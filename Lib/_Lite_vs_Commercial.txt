@@ -1,0 +1,69 @@
+The following units from the "LIB" folder,
+included with a commercial RTC SDK release,
+are NOT included in the *LITE* RTC SDK edition:
+
+  rtcAcriveX
+  rtcCliPool
+  rtcDataRoute
+  rtcDB
+  rtcDBCli
+  rtcDnsQuery
+  rtcEditors
+  rtcGateCli
+  rtcGateConst
+  rtcGateSrv
+  rtcISAPIApp
+  rtcISAPIProject
+  rtcISAPISrv
+  rtcISAPISrvProv
+  rtcLoadBalance
+  rtcMemory
+  rtcMsgCli
+  rtcMsgCliProv
+  rtcMsgSrv
+  rtcMsgSrvProv
+  rtcNixSock
+  rtcParse
+  rtcRSA
+  rtcScript
+  rtcScriptCompile
+  rtcSrcList
+  rtcSrcTree
+  rtcTcpCli
+  rtcTcpSrv
+  rtcTransports
+  rtcUdpCli
+  rtcUdpSrv
+  rtcWInetHttpCliProv
+  rtcWinHttpCliProv
+  rtcWinSocket
+  
+Also, the following folders from the 
+full commercial RTC SDK release are NOT
+included in the *LITE* RTC SDK version:
+
+  Lib/synsock
+  Lib/zlib
+  LibPlugins
+  
+  Demos
+  Help
+  MultiIDE
+  QuickStart
+  Tools
+
+RTC SDK *LITE* edition uses a *modified* version
+of the following files to compile without errors,
+despite the fact that a lot of files from the full
+commercial RTC SDK version (see below) are NOT:
+
+  rtcDeploy.inc
+  rtcSDK.dpk
+  rtcSDKD.dpk
+
+All other files are identical between the *LITE* 
+and the FULL *commercial* RTC SDK versions, which 
+allows you to easily UPGRADE from the latest *LITE* 
+RTC SDK version to the latest commercial RTC SDK 
+release, simply by following the steps described 
+for UPDATING the RealThinClient SDK in Delphi.

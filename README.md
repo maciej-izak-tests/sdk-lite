@@ -86,16 +86,18 @@ need to Build and Install all related packages again, after you reinstall the RT
 3.) *LITE* version LIMITATIONS
 -------------------------------
 
-A) *LITE* RTC SDK version ONLY has blocking WinSock API support.
-   Support for WinInet and WinHTTP APIs (Proxy and SSL support on Windows), Asynchronous 
-   WinSock API (higher load capacity and reduced resource usage on Windows), ISAPI Server 
-   support (compile Server-side code into an ISAPI DLL), Message-based Client/Server support,
-   raw UDP and TCP Client and Server components, as well multi-platform support (required to
-   target iOS, Mac OSX and Android platforms) are NOT included in the *LITE* RTC SDK version.
 
-B) *LITE* RTC SDK version ONLY has basic HTTP Client/Server and Remote Function support.
-   Support for more advanced features like SSL and RSA Encryption, Scripting, Data Routing,
-   Load Balancing and a general-purpose package Gateway are NOT included in RTC SDK *LITE*.
+A) *LITE* RTC SDK version ONLY has blocking WinSock API support. *LITE* RTC SDK version
+   does NOT have multi-platform support (required to target iOS, OSX and Android platforms), 
+   support for WinInet and WinHTTP APIs (Firewall/Proxy and SSL support on Windows), Async
+   WinSock API support (higher load capacity and reduced resource usage for Windows Servers), 
+   ISAPI support (compile Server-side code into an ISAPI DLL), Message-based Client/Server 
+   support, UDP and TCP Client/Server support.
+
+B) *LITE* RTC SDK version ONLY has basic HTTP Client/Server and Remote Function components.
+   *LITE* RTC SDK version does NOT include more advanced features and components (like SSL 
+   and RSA Encryption, Scripting, Data Routing, Load Balancing, general-purpose Gateway and 
+   Multi-Gate Clients, in-memory DataSets and DataSet monitoring).
 
 C) *LITE* RTC SDK version does NOT include support.
 

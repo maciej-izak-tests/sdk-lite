@@ -1,7 +1,9 @@
 RealThinClient SDK *LITE*
+
 http://www.realthinclient.com
 
 Copyright 2004-2017 (c) RealThinClient.com
+
 All rights reserved.
 
 --------------------------------

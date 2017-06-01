@@ -2,7 +2,7 @@ The following units from the "LIB" folder,
 included with a commercial RTC SDK release,
 are NOT included in the *LITE* RTC SDK edition:
 
-  rtcAcriveX
+  rtcActiveX
   rtcCliPool
   rtcDataRoute
   rtcDB

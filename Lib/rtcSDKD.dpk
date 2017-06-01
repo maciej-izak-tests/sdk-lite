@@ -1,0 +1,47 @@
+package rtcSDKD;
+
+{$R *.res}
+{$R 'rtcConn.dcr'}
+{$R 'rtcHttpSrv.dcr'}
+{$R 'rtcDataSrv.dcr'}
+{$R 'rtcHttpCli.dcr'}
+{$R 'rtcDataCli.dcr'}
+{$R 'rtcSrvModule.dcr'}
+{$R 'rtcCliModule.dcr'}
+{$R 'rtcFunction.dcr'}
+{$R 'rtcPlugins.dcr'}
+{$R 'rtcThrPool.dcr'}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DESCRIPTION 'RealThinClient SDK 8 *LITE* (design)'}
+{$DESIGNONLY}
+{$IMPLICITBUILD OFF}
+{$DEFINE DEBUG}
+
+requires
+  rtl,
+  rtcSDK;
+
+contains
+  rtcRegisterLite in 'rtcRegisterLite.pas';
+
+end.

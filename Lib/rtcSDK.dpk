@@ -1,0 +1,86 @@
+package rtcSDK;
+
+{$R *.res}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DESCRIPTION 'RealThinClient SDK 8 *LITE*'}
+{$IMPLICITBUILD OFF}
+{$DEFINE DEBUG}
+
+requires
+  rtl;
+
+contains
+  memBinTree in 'memBinTree.pas',
+  memObjList in 'memObjList.pas',
+  memBinList in 'memBinList.pas',
+  memPtrPool in 'memPtrPool.pas',
+  memStringObjList in 'memStringObjList.pas',
+  memXList in 'memXList.pas',
+  memStringIntList in 'memStringIntList.pas',
+  memStrIntList in 'memStrIntList.pas',
+  memStrIntTree in 'memStrIntTree.pas',
+  memStrObjList in 'memStrObjList.pas',
+  memXObjList in 'memXObjList.pas',
+  memStrList in 'memStrList.pas',
+  memXSList in 'memXSList.pas',
+  memStringPtrList in 'memStringPtrList.pas',
+  memItemList in 'memItemList.pas',
+  rtcService in 'rtcService.pas',
+  rtcConn in 'rtcConn.pas',
+  rtcHttpSrv in 'rtcHttpSrv.pas',
+  rtcTimer in 'rtcTimer.pas',
+  rtcInfo in 'rtcInfo.pas',
+  rtcThrPool in 'rtcThrPool.pas',
+  rtcLog in 'rtcLog.pas',
+  rtcDataSrv in 'rtcDataSrv.pas',
+  rtcHttpCli in 'rtcHttpCli.pas',
+  rtcDataCli in 'rtcDataCli.pas',
+  rtcSrvModule in 'rtcSrvModule.pas',
+  rtcCliModule in 'rtcCliModule.pas',
+  rtcFunction in 'rtcFunction.pas',
+  rtcSocketCliProv in 'rtcSocketCliProv.pas',
+  rtcSocketSrvProv in 'rtcSocketSrvProv.pas',
+  rtcZLib in 'rtcZLib.pas',
+  rtcCrypt in 'rtcCrypt.pas',
+  rtcSocketPool in 'rtcSocketPool.pas',
+  rtcThrConnProv in 'rtcThrConnProv.pas',
+  rtcConnProv in 'rtcConnProv.pas',
+  rtcSyncObjs in 'rtcSyncObjs.pas',
+  rtcPlugins in 'rtcPlugins.pas',
+  rtcFastStrings in 'rtcFastStrings.pas',
+  rtcSocketHttpCliProv in 'rtcSocketHttpCliProv.pas',
+  rtcSocketHttpSrvProv in 'rtcSocketHttpSrvProv.pas',
+  rtcSockBaseCliProv in 'rtcSockBaseCliProv.pas',
+  rtcSockBaseSrvProv in 'rtcSockBaseSrvProv.pas',
+  rtcSockBase in 'rtcSockBase.pas',
+  rtcSockets in 'rtcSockets.pas',
+  rtcSockBaseSyn in 'rtcSockBaseSyn.pas',
+  rtcSynSocket in 'rtcSynSocket.pas',
+  rtcSynAPI in 'rtcSynAPI.pas',
+  rtcTypes in 'rtcTypes.pas',
+  rtcKeyHash in 'rtcKeyHash.pas',
+  rtcLink in 'rtcLink.pas',
+  rtcHWndPool in 'rtcHWndPool.pas',
+  rtcWinSock in 'rtcWinSock.pas';
+
+end.

@@ -55,7 +55,7 @@ included in the *LITE* RTC SDK version:
 RTC SDK *LITE* edition uses a *modified* version
 of the following files to compile without errors,
 despite the fact that a lot of files from the full
-commercial RTC SDK version (see below) are NOT:
+commercial RTC SDK version are NOT included:
 
   rtcDeploy.inc
   rtcSDK.dpk

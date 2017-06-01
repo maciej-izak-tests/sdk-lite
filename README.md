@@ -36,7 +36,7 @@ There, all the settings are separated by platforms, so you  will need to
 repeat the process for every platform you want to use the "RTC SDK" with.
 
 Once you have configured the "Library path" (so the IDE can find RTC SDK files), open the
-"SDKPackages_Lite" Project Group, containing these 2 runtime and 2 design-time packages:
+"SDKPackages_Lite" Project Group, containing 1 runtime and 1 design-time package:
  
   rtcSDK.dpk       -> The main runtime Package, contains all Client and Server components. 
   rtcSDKD.dpk      -> The main design-time Package, registers all Client and Server components.
@@ -48,7 +48,7 @@ file in the Project Manager accessed in the "View" drop-down menu.
 
 When compiled and installed, you will see a message listing all components installed.
 
-NOTE: You should ONLY compile and install all RTC packages for the Win32 platform, because the 
+NOTE: You should ONLY compile and install RTC packages for the Win32 platform, because the 
 Delphi IDE is a Win32 Application. First compile and install runtime packages, then desig-time.
 
 NOTE: When switching Projects or changing the active target platform on a Project, 
@@ -73,7 +73,7 @@ Scroll down to find "RealThinClient SDK" and click on it (single click).
 When you select it, click the button "Remove" and Delphi will ask you 
 if you want to remove this package. Clicking "Yes" will uninstall the RTC SDK.
 
-After that, *close* Delphi and follow step (2) to install the new RTC SDK package.
+After that, *close* Delphi and follow step (1) to install the new RTC SDK package.
 
 NOTE: Uninstalling the RTC SDK package will also uninstall all packages which 
 are using the RTC SDK (for example "rtcSDK_DBA" and "RTC Portal" packages). 

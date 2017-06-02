@@ -73,7 +73,6 @@ contains
   rtcSockBaseCliProv in 'rtcSockBaseCliProv.pas',
   rtcSockBaseSrvProv in 'rtcSockBaseSrvProv.pas',
   rtcSockBase in 'rtcSockBase.pas',
-  rtcSockets in 'rtcSockets.pas',
   rtcSockBaseSyn in 'rtcSockBaseSyn.pas',
   rtcSynSocket in 'rtcSynSocket.pas',
   rtcSynAPI in 'rtcSynAPI.pas',

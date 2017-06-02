@@ -25,6 +25,7 @@ package rtcSDK;
 {$DESCRIPTION 'RealThinClient SDK 8 *LITE*'}
 {$IMPLICITBUILD OFF}
 {$DEFINE DEBUG}
+{$DEFINE RTCSDK_LITE}
 
 requires
   rtl;
@@ -62,7 +63,6 @@ contains
   rtcSocketSrvProv in 'rtcSocketSrvProv.pas',
   rtcZLib in 'rtcZLib.pas',
   rtcCrypt in 'rtcCrypt.pas',
-  rtcSocketPool in 'rtcSocketPool.pas',
   rtcThrConnProv in 'rtcThrConnProv.pas',
   rtcConnProv in 'rtcConnProv.pas',
   rtcSyncObjs in 'rtcSyncObjs.pas',
@@ -80,7 +80,6 @@ contains
   rtcTypes in 'rtcTypes.pas',
   rtcKeyHash in 'rtcKeyHash.pas',
   rtcLink in 'rtcLink.pas',
-  rtcHWndPool in 'rtcHWndPool.pas',
   rtcWinSock in 'rtcWinSock.pas';
 
 end.

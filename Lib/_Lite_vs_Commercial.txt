@@ -29,6 +29,7 @@ are NOT included in the *LITE* RTC SDK edition:
   rtcScript
   rtcScriptCompile
   rtcSocketPool
+  rtcSockets
   rtcSrcList
   rtcSrcTree
   rtcTcpCli

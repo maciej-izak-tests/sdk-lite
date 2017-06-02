@@ -1068,6 +1068,7 @@ const
   CLIMOD_ACTIVE = 'ClientModule$';
   CLIMOD_CALLS  = 'CLIMOD.CALL$';
   CLIMOD_LOGIN  = 'CLIMOD.LOGIN$';
+  CLIMOD_READY  = 'CLIMOD.READY$'; 
 
 procedure PostInteractive;
   begin
@@ -1406,6 +1407,12 @@ procedure TRtcClientModule.Call_BeginRequest(Sender: TRtcConnection);
   {$ENDIF}
     val:TRtcValue;
     HaveCleared:integer;
+  function isNewRequest:boolean;
+    begin
+    Result:=not Sender.Request.Info.asBoolean[CLIMOD_READY];
+    if Result then
+      Sender.Request.Info.asBoolean[CLIMOD_READY]:=True;
+    end;
   begin
   if FResetLogin then
     begin
@@ -1672,7 +1679,7 @@ procedure TRtcClientModule.Call_BeginRequest(Sender: TRtcConnection);
               end;
             end;
 
-          if Request.Reposted=0 then
+          if isNewRequest then
             begin
             if Request.Method='' then
               Request.Method:='POST';
@@ -1721,7 +1728,7 @@ procedure TRtcClientModule.Call_BeginRequest(Sender: TRtcConnection);
           begin
           if (FDataReqMode=req_contentBodyALL) or (MyCalls.EventCount>1) then
             begin
-            if Request.Reposted=0 then
+            if isNewRequest then
               begin
               if Request.Method='' then
                 Request.Method:='POST';
@@ -1782,14 +1789,15 @@ procedure TRtcClientModule.Call_BeginRequest(Sender: TRtcConnection);
             if MyCalls.CheckType(idx,rtc_Function) then
               begin
               MyCalls.asFunction[idx].reqVer:=0;
-              if Request.Reposted=0 then
+              if isNewRequest then
                 Request.FileName:=SlashName(
                                     SlashName( FModuleFileREST,
                                                URL_Encode(Utf8Encode(MyCalls.asFunction[idx].FunctionName)) ),
                                             Request.FileName);
               end
-            else if Request.Reposted=0 then
+            else if isNewRequest then
               Request.FileName:=SlashName(FModuleFileName,Request.FileName);
+
             case FDataFormat of
               fmt_RTC:
                 begin
@@ -1802,14 +1810,13 @@ procedure TRtcClientModule.Call_BeginRequest(Sender: TRtcConnection);
               else
                 codeEx:=MyCalls.asObject[idx].toJSONEx;
               end;
-            if Request.Reposted=0 then
-              begin
-              if Request.Method='' then
-                Request.Method:='POST';
-              if Request.Host='' then
-                if FDataFormat<>fmt_RTC then
-                  Request.Host:=ServerAddr;
-              end;
+
+            if Request.Method='' then
+              Request.Method:='POST';
+            if Request.Host='' then
+              if FDataFormat<>fmt_RTC then
+                Request.Host:=ServerAddr;
+
             WriteEx(codeEx);
             end
           else if FDataReqMode=req_contentBodyOptional then
@@ -1821,7 +1828,7 @@ procedure TRtcClientModule.Call_BeginRequest(Sender: TRtcConnection);
             if MyCalls.CheckType(idx,rtc_Function) then
               begin
               MyCalls.asFunction[idx].reqVer:=0;
-              if Request.Reposted=0 then
+              if isNewRequest then
                 Request.FileName:=SlashName(
                                     SlashName(FModuleFileREST,
                                               URL_Encode(Utf8Encode(MyCalls.asFunction[idx].FunctionName)) ),
@@ -1833,7 +1840,7 @@ procedure TRtcClientModule.Call_BeginRequest(Sender: TRtcConnection);
               begin
               if MyCalls.CheckType(idx,rtc_Null) then
                 idx:=1; // no parameters
-              if Request.Reposted=0 then
+              if isNewRequest then
                 Request.FileName:=SlashName(FModuleFileName,Request.FileName);
               end;
 
@@ -1979,7 +1986,7 @@ procedure TRtcClientModule.Call_BeginRequest(Sender: TRtcConnection);
 
                 end;
 
-              if Request.Reposted=0 then
+              if isNewRequest then
                 Request.URI:= SlashName(
                                 SlashName(FModuleFileREST,
                                           URL_Encode(Utf8Encode(MyCalls.asFunction[idx].FunctionName)) ),
@@ -2089,7 +2096,7 @@ procedure TRtcClientModule.Call_BeginRequest(Sender: TRtcConnection);
 
                 end;
 
-              if Request.Reposted=0 then
+              if isNewRequest then
                 Request.URI:=SlashName(FModuleFileName,Request.FileName) +
                              code;
               code:='';
@@ -2172,7 +2179,7 @@ procedure TRtcClientModule.Call_BeginRequest(Sender: TRtcConnection);
 
                 end;
 
-              if Request.Reposted=0 then
+              if isNewRequest then
                 Request.URI:=SlashName(FModuleFileName,Request.FileName) +
                              code;
               code:='';
@@ -2180,21 +2187,18 @@ procedure TRtcClientModule.Call_BeginRequest(Sender: TRtcConnection);
             else
               begin
               code:='';
-              if Request.Reposted=0 then
+              if isNewRequest then
                 Request.FileName:=SlashName(FModuleFileName,Request.FileName);
               end;
 
-            if Request.Reposted=0 then
-              begin
-              if Request.Method='' then
-                if length(code)=0 then
-                  Request.Method:='GET'
-                else
-                  Request.Method:='POST';
+            if Request.Method='' then
+              if length(code)=0 then
+                Request.Method:='GET'
+              else
+                Request.Method:='POST';
+            if FDataFormat<>fmt_RTC then
               if Request.Host='' then
-                if FDataFormat<>fmt_RTC then
-                  Request.Host:=ServerAddr;
-              end;
+                Request.Host:=ServerAddr;
 
             Write(code);
             end;

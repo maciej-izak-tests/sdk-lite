@@ -12,6 +12,7 @@ are NOT included in the *LITE* RTC SDK edition:
   rtcGateCli
   rtcGateConst
   rtcGateSrv
+  rtcHWndPool
   rtcISAPIApp
   rtcISAPIProject
   rtcISAPISrv
@@ -27,6 +28,7 @@ are NOT included in the *LITE* RTC SDK edition:
   rtcRSA
   rtcScript
   rtcScriptCompile
+  rtcSocketPool
   rtcSrcList
   rtcSrcTree
   rtcTcpCli

@@ -99,8 +99,7 @@ type
     procedure Sock_SetTimeouts(const TOA:TRtcTimeoutsOfAPI);
 
     procedure Sock_Connect(const vAddr,vPort: RtcString; const TOA:TRtcTimeoutsOfAPI; PreferIP4, PreferIPDef:boolean);
-    procedure Sock_Bind(const vAddr,vPort: RtcString; PreferIP4, PreferIPDef:boolean);
-    procedure Sock_Listen(const TOA:TRtcTimeoutsOfAPI; PreferIP4:boolean);
+    procedure Sock_Listen(const vAddr,vPort: RtcString; const TOA:TRtcTimeoutsOfAPI; PreferIP4, PreferIPDef:boolean);
 
     function Sock_Accept:TSocket;
     procedure Sock_SetSocket(sid:TSocket; PreferIP4:boolean);
@@ -250,14 +249,21 @@ destructor TRtcSocket.Destroy;
 
 function TRtcSocket.Listen(const FAddr,FPort:RtcString; const TOA:TRtcTimeoutsOfAPI; PreferIP4, PreferIPDef:boolean): boolean;
   begin
-  Result:=False;
   Sock_ResetError;
 
-  Sock_Bind(FAddr,FPort,PreferIP4,PreferIPDef);
-  if Sock_CheckError then Exit;
-
-  Sock_Listen(TOA,PreferIP4);
+  Sock_Listen(FAddr,FPort,TOA,PreferIP4,PreferIPDef);
   Result:= not Sock_CheckError;
+  if not Result then
+    Sock_Close;
+  end;
+
+function TRtcSocket.Connect(const FAddr,FPort:RtcString; const TOA:TRtcTimeoutsOfAPI; PreferIP4, PreferIPDef:boolean): boolean;
+  begin
+  Sock_ResetError;
+
+  Sock_Connect(FAddr,FPort,TOA,PreferIP4,PreferIPDef);
+  Result:= not Sock_CheckError;
+
   if not Result then
     Sock_Close;
   end;
@@ -306,17 +312,6 @@ function TRtcSocket.Close: boolean;
 function TRtcSocket.Shut_down:boolean;
   begin
   Result:=Sock_Shutdown;
-  end;
-
-function TRtcSocket.Connect(const FAddr,FPort:RtcString; const TOA:TRtcTimeoutsOfAPI; PreferIP4, PreferIPDef:boolean): boolean;
-  begin
-  Sock_ResetError;
-
-  Sock_Connect(FAddr,FPort,TOA,PreferIP4,PreferIPDef);
-  Result:= not Sock_CheckError;
-
-  if not Result then
-    Sock_Close;
   end;
 
 function TRtcSocket.ReceiveEx(var Str: RtcByteArray; vTimeout:integer): boolean;
@@ -862,7 +857,7 @@ function TRtcSocket.Sock_GetRemoteSinPort: RtcString;
 {$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}
   end;
 
-procedure TRtcSocket.Sock_Bind(const vAddr, vPort: RtcString; PreferIP4, PreferIPDef:boolean);
+procedure TRtcSocket.Sock_Listen(const vAddr, vPort: RtcString; const TOA:TRtcTimeoutsOfAPI; PreferIP4, PreferIPDef:boolean);
   var
     Sin: TSockAddr;
   {$IFDEF POSIX}
@@ -870,6 +865,7 @@ procedure TRtcSocket.Sock_Bind(const vAddr, vPort: RtcString; PreferIP4, PreferI
     LocSin: TSockAddr;
     vLocSin: TAPISockAddr absolute LocSin;
   {$ENDIF}
+    blog:integer;
   begin
   Sock_SetSin(Sin,vAddr,vPort,PreferIP4,PreferIPDef);
   if FErrCode<>0 then Exit;
@@ -878,6 +874,12 @@ procedure TRtcSocket.Sock_Bind(const vAddr, vPort: RtcString; PreferIP4, PreferI
     Sock_CreateSocket(Sin);
     if FErrCode<>0 then Exit;
     end;
+  Sock_SetDelay;
+  Sock_SetTimeouts(TOA);
+  Sock_SetLinger(False,0);
+
+  // BIND socket ...
+
 {$IFDEF WINDOWS}
   if Sock_Err(_Bind(FSocket, Sin, SizeOfSockAddr(Sin))) then Exit;
   FLocalSinLen:=SizeOf(FLocalSin);
@@ -905,6 +907,28 @@ procedure TRtcSocket.Sock_Bind(const vAddr, vPort: RtcString; PreferIP4, PreferI
   if Sock_Err(WSA_Bind(FSocket, Sin)) then Exit;
   Sock_Err(WSA_GetSockName(FSocket, FLocalSin, PreferIP4));
 {$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}
+
+  // Start socket Listener ...
+
+  blog:=LISTEN_BACKLOG;
+  if blog>SOMAXCONN then blog:=SOMAXCONN;
+{$IFDEF WINDOWS}
+  if Sock_Err(_Listen(FSocket, blog)) then Exit;
+  FLocalSinLen:=SizeOf(FLocalSin);
+  if Sock_Err(_GetSockName(FSocket, FLocalSin, FLocalSinLen)) then Exit;
+{$ELSE}{$IFDEF FPSOCK}
+  if Sock_Err(fpListen(FSocket, blog)) then Exit;
+  if Sock_Err(WSA_GetSockName(FSocket, FLocalSin, PreferIP4)) then Exit;
+{$ELSE}{$IFDEF POSIX}
+  if Sock_Err(Posix.SysSocket.Listen(FSocket, blog)) then Exit;
+
+  FLocalSinLen:=SizeOf(FLocalSin);
+  if Sock_Err(GetSockName(FSocket, vLocSin, FLocalSinLen)) then Exit;
+  FLocalSin:=LocSin;
+{$ELSE}{$IFDEF RTC_NIX_SOCK}
+  if Sock_Err(WSA_Listen(FSocket, blog)) then Exit;
+  if Sock_Err(WSA_GetSockName(FSocket, FLocalSin, PreferIP4)) then Exit;
+{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}
   end;
 
 procedure TRtcSocket.Sock_Connect(const vAddr, vPort: RtcString; const TOA:TRtcTimeoutsOfAPI; PreferIP4, PreferIPDef:boolean);
@@ -924,6 +948,10 @@ procedure TRtcSocket.Sock_Connect(const vAddr, vPort: RtcString; const TOA:TRtcT
     Sock_CreateSocket(Sin);
     if FErrCode<>0 then Exit;
     end;
+  Sock_SetDelay;
+  Sock_SetTimeouts(TOA);
+  Sock_SetLinger(False,0);
+
 {$IFDEF WINDOWS}
   if Sock_Err(_Connect(FSocket, Sin, SizeOfSockAddr(Sin))) then Exit;
   FLocalSinLen:=SizeOf(FLocalSin);
@@ -959,47 +987,6 @@ procedure TRtcSocket.Sock_Connect(const vAddr, vPort: RtcString; const TOA:TRtcT
   if Sock_Err(WSA_GetSockName(FSocket, FLocalSin, PreferIP4)) then Exit;
   if Sock_Err(WSA_GetPeerName(FSocket, FRemoteSin, PreferIP4)) then Exit;
 {$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}
-  Sock_SetDelay;
-  Sock_SetTimeouts(TOA);
-  Sock_SetLinger(False,0);
-  end;
-
-procedure TRtcSocket.Sock_Listen(const TOA:TRtcTimeoutsOfAPI; PreferIP4:boolean);
-  var
-    blog:integer;
-  {$IFDEF POSIX}
-    LocSin:TSockAddr;
-    vLocSin:TAPISockAddr absolute LocSin;
-  {$ENDIF}
-  begin
-  if FOSocket=INVALID_SOCKET then
-    begin
-    FErrCode:=-1;
-    FErr:='Socket closed';
-    Exit;
-    end;
-  blog:=LISTEN_BACKLOG;
-  if blog>SOMAXCONN then blog:=SOMAXCONN;
-{$IFDEF WINDOWS}
-  if Sock_Err(_Listen(FSocket, blog)) then Exit;
-  FLocalSinLen:=SizeOf(FLocalSin);
-  if Sock_Err(_GetSockName(FSocket, FLocalSin, FLocalSinLen)) then Exit;
-{$ELSE}{$IFDEF FPSOCK}
-  if Sock_Err(fpListen(FSocket, blog)) then Exit;
-  if Sock_Err(WSA_GetSockName(FSocket, FLocalSin, PreferIP4)) then Exit;
-{$ELSE}{$IFDEF POSIX}
-  if Sock_Err(Posix.SysSocket.Listen(FSocket, blog)) then Exit;
-
-  FLocalSinLen:=SizeOf(FLocalSin);
-  if Sock_Err(GetSockName(FSocket, vLocSin, FLocalSinLen)) then Exit;
-  FLocalSin:=LocSin;
-{$ELSE}{$IFDEF RTC_NIX_SOCK}
-  if Sock_Err(WSA_Listen(FSocket, blog)) then Exit;
-  if Sock_Err(WSA_GetSockName(FSocket, FLocalSin, PreferIP4)) then Exit;
-{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}
-  Sock_SetDelay;
-  Sock_SetTimeouts(TOA);
-  Sock_SetLinger(False,0);
   end;
 
 function TRtcSocket.Sock_Accept: TSocket;

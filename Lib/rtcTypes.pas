@@ -10,7 +10,7 @@ interface
 
 const
   // RealThinClient SDK version
-  RTCSDK_VERSION='v8.05 (2017.Q2)';
+  RTCSDK_VERSION='v8.06 (2017.Q2)';
 
 const
 {$IFDEF WINDOWS}
@@ -83,10 +83,18 @@ type
 {$ELSE}
   // @exclude
   RtcBinWideChar = Word;
-  // Unicode String
-  RtcWideString = WideString;
-  // Unicode character
-  RtcWideChar = WideChar;
+  {$IFDEF FPC_UNICODE}
+    {$DEFINE UNICODE}
+    // Unicode String
+    RtcWideString = UnicodeString;
+    // Unicode character
+    RtcWideChar = UnicodeChar;
+  {$ELSE}
+    // Unicode String
+    RtcWideString = WideString;
+    // Unicode character
+    RtcWideChar = WideChar;
+  {$ENDIF}
 {$ENDIF}
 
 {$IFDEF NEXTGEN}

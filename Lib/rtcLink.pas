@@ -1045,7 +1045,7 @@ procedure TRtcRemoteObjectManager._RemoteDestroy(const xLink: TRtcObjectLink);
     begin
     xParam:=TRtcObjectCall.Create(self);
     try
-      xParam.xName:=RTCL_PFX_DESTROY+IntToStr(xLink.OID);
+      xParam.xName:=RTCL_PFX_DESTROY+Int2WStr(xLink.OID);
       Prep(xParam);
     finally
       xParam.Free;
@@ -1057,7 +1057,7 @@ procedure TRtcRemoteObjectManager._RemoteCreate(const xLink: TRtcObjectLink; xPa
   begin
   if FActive then
     begin
-    xParam.xName:=RTCL_PFX_CREATE+IntToStr(xLink.OID)+xParam.xName;
+    xParam.xName:=RTCL_PFX_CREATE+Int2WStr(xLink.OID)+xParam.xName;
     Prep(xParam);
     end
   else
@@ -1068,7 +1068,7 @@ procedure TRtcRemoteObjectManager._SetProp(const xLink: TRtcObjectLink; xParam:T
   begin
   if FActive then
     begin
-    xParam.xName:=RTCL_PFX_SETPROP+IntToStr(xLink.OID)+xParam.xName;
+    xParam.xName:=RTCL_PFX_SETPROP+Int2WStr(xLink.OID)+xParam.xName;
     Prep(xParam,xNow);
     end
   else
@@ -1079,7 +1079,7 @@ procedure TRtcRemoteObjectManager._SetEvent(const xLink: TRtcObjectLink; xParam:
   begin
   if FActive then
     begin
-    xParam.xName:=RTCL_PFX_SETEVENT+IntToStr(xLink.OID)+xParam.xName;
+    xParam.xName:=RTCL_PFX_SETEVENT+Int2WStr(xLink.OID)+xParam.xName;
     Prep(xParam);
     end
   else
@@ -1090,7 +1090,7 @@ procedure TRtcRemoteObjectManager._CallEvent(const xLink: TRtcObjectLink; xParam
   begin
   if FActive then
     begin
-    xParam.xName:=RTCL_PFX_CALLEVENT+IntToStr(xLink.OID)+xParam.xName;
+    xParam.xName:=RTCL_PFX_CALLEVENT+Int2WStr(xLink.OID)+xParam.xName;
     Prep(xParam);
     end
   else
@@ -1101,7 +1101,7 @@ procedure TRtcRemoteObjectManager._CallMethod(const xLink: TRtcObjectLink; xPara
   begin
   if FActive then
     begin
-    xParam.xName:=RTCL_PFX_CALLMETHOD+IntToStr(xLink.OID)+xParam.xName;
+    xParam.xName:=RTCL_PFX_CALLMETHOD+Int2WStr(xLink.OID)+xParam.xName;
     Prep(xParam);
     end
   else
@@ -1123,7 +1123,7 @@ function TRtcRemoteObjectManager.ExecuteNow(Sender:TObject; const xData: TRtcVal
       Result:=False;
       l:=length(fn);
       if l<2 then
-        Execute_BadFormat('ExecuteNow['+IntToStr(i)+'].'+fn)
+        Execute_BadFormat('ExecuteNow['+Int2WStr(i)+'].'+fn)
       else
         begin
         a:=1;
@@ -1134,16 +1134,16 @@ function TRtcRemoteObjectManager.ExecuteNow(Sender:TObject; const xData: TRtcVal
         while (a<l) and (fn[a+1]>='0') and (fn[a+1]<='9') do
           Inc(a);
         if a<=1 then
-          Execute_BadFormat('ExecuteNow['+IntToStr(i)+'].'+fn)
+          Execute_BadFormat('ExecuteNow['+Int2WStr(i)+'].'+fn)
         else if a=l then
           begin
-          xOID:=StrToInt(Copy(fn,2,a-1));
+          xOID:=StrToInt(String(Copy(fn,2,a-1)));
           xName:='';
           Result:=True;
           end
         else
           begin
-          xOID:=StrToInt(Copy(fn,2,a-1));
+          xOID:=StrToInt(String(Copy(fn,2,a-1)));
           xName:=Copy(fn,a+1,l-a);
           Result:=True;
           end;
@@ -1163,7 +1163,7 @@ function TRtcRemoteObjectManager.ExecuteNow(Sender:TObject; const xData: TRtcVal
           RTCL_PFX_CREATE:
             begin
             if xName='' then
-              Execute_BadFormat('ExecuteNow['+IntToStr(i)+'].'+fn)
+              Execute_BadFormat('ExecuteNow['+Int2WStr(i)+'].'+fn)
             else
               begin
               xVal:=TRtcObjectCall.Create(self);
@@ -1180,7 +1180,7 @@ function TRtcRemoteObjectManager.ExecuteNow(Sender:TObject; const xData: TRtcVal
           RTCL_PFX_SETPROP:
             begin
             if xName='' then
-              Execute_BadFormat('ExecuteNow['+IntToStr(i)+'].'+fn)
+              Execute_BadFormat('ExecuteNow['+Int2WStr(i)+'].'+fn)
             else
               begin
               xVal:=TRtcObjectCall.Create(self);
@@ -1197,7 +1197,7 @@ function TRtcRemoteObjectManager.ExecuteNow(Sender:TObject; const xData: TRtcVal
           RTCL_PFX_SETEVENT:
             begin
             if xName='' then
-              Execute_BadFormat('ExecuteNow['+IntToStr(i)+'].'+fn)
+              Execute_BadFormat('ExecuteNow['+Int2WStr(i)+'].'+fn)
             else
               begin
               xVal:=TRtcObjectCall.Create(self);
@@ -1214,7 +1214,7 @@ function TRtcRemoteObjectManager.ExecuteNow(Sender:TObject; const xData: TRtcVal
           RTCL_PFX_CALLEVENT:
             begin
             if xName='' then
-              Execute_BadFormat('ExecuteNow['+IntToStr(i)+'].'+fn)
+              Execute_BadFormat('ExecuteNow['+Int2WStr(i)+'].'+fn)
             else
               begin
               xVal:=TRtcObjectCall.Create(self);
@@ -1231,7 +1231,7 @@ function TRtcRemoteObjectManager.ExecuteNow(Sender:TObject; const xData: TRtcVal
           RTCL_PFX_CALLMETHOD:
             begin
             if xName='' then
-              Execute_BadFormat('ExecuteNow['+IntToStr(i)+'].'+fn)
+              Execute_BadFormat('ExecuteNow['+Int2WStr(i)+'].'+fn)
             else
               begin
               xVal:=TRtcObjectCall.Create(self);
@@ -1248,7 +1248,7 @@ function TRtcRemoteObjectManager.ExecuteNow(Sender:TObject; const xData: TRtcVal
           RTCL_PFX_BROADCAST:
             begin
             if xName='' then
-              Execute_BadFormat('ExecuteNow['+IntToStr(i)+'].'+fn)
+              Execute_BadFormat('ExecuteNow['+Int2WStr(i)+'].'+fn)
             else
               begin
               xVal:=TRtcObjectCall.Create(self);
@@ -1263,7 +1263,7 @@ function TRtcRemoteObjectManager.ExecuteNow(Sender:TObject; const xData: TRtcVal
               end;
             end;
           else
-            Execute_BadFormat('ExecuteNow['+IntToStr(i)+'].'+fn);
+            Execute_BadFormat('ExecuteNow['+Int2WStr(i)+'].'+fn);
           end;
         end;
       end;
@@ -1276,7 +1276,7 @@ function TRtcRemoteObjectManager.ExecuteNow(Sender:TObject; const xData: TRtcVal
       if arr.isType[i]=rtc_Record then
         ExecuteRec(arr.asRecord[i])
       else
-        Execute_BadFormat('ExecuteNow['+IntToStr(i)+']');
+        Execute_BadFormat('ExecuteNow['+Int2WStr(i)+']');
     end;
   begin
   if FActive and assigned(xData) then
@@ -1317,10 +1317,10 @@ procedure TRtcRemoteObjectManager.DoCreate(Sender:TObject; xOID: TRtcObjectID; x
         end;
       end
     else
-      Execute_NoConstructor(xParam.xName, 'DoCreate('+IntToStr(xOID)+')');
+      Execute_NoConstructor(xParam.xName, 'DoCreate('+Int2WStr(xOID)+')');
   except
     on E:Exception do
-      Execute_Exception(E,'DoCreate('+IntToStr(xOID)+','+xParam.xName+')');
+      Execute_Exception(E,'DoCreate('+Int2WStr(xOID)+','+xParam.xName+')');
     end;
   end;
 
@@ -1338,13 +1338,13 @@ procedure TRtcRemoteObjectManager.DoDestroy(Sender:TObject; xOID: TRtcObjectID);
         xLink.DestroyOwner;
         end
       else
-        Execute_ObjectNotFound(xOID,'DoDestroy('+IntToStr(xOID)+')');
+        Execute_ObjectNotFound(xOID,'DoDestroy('+Int2WStr(xOID)+')');
       end
     else
-      Execute_ObjectNotFound(xOID,'DoDestroy('+IntToStr(xOID)+')');
+      Execute_ObjectNotFound(xOID,'DoDestroy('+Int2WStr(xOID)+')');
   except
     on E:Exception do
-      Execute_Exception(E,'DoDestroy('+IntToStr(xOID)+')');
+      Execute_Exception(E,'DoDestroy('+Int2WStr(xOID)+')');
     end;
   end;
 
@@ -1357,10 +1357,10 @@ procedure TRtcRemoteObjectManager.DoPropSet(Sender:TObject; xOID: TRtcObjectID; 
     if assigned(xLink) then
       xLink.DoPropSet(Sender,xParam)
     else
-      Execute_ObjectNotFound(xOID,'DoPropSet('+IntToStr(xOID)+','+xParam.xName+')');
+      Execute_ObjectNotFound(xOID,'DoPropSet('+Int2WStr(xOID)+','+xParam.xName+')');
   except
     on E:Exception do
-      Execute_Exception(E,'DoPropSet('+IntToStr(xOID)+','+xParam.xName+')');
+      Execute_Exception(E,'DoPropSet('+Int2WStr(xOID)+','+xParam.xName+')');
     end;
   end;
 
@@ -1373,10 +1373,10 @@ procedure TRtcRemoteObjectManager.DoEventSet(Sender:TObject; xOID: TRtcObjectID;
     if assigned(xLink) then
       xLink.DoEventSet(Sender,xParam)
     else
-      Execute_ObjectNotFound(xOID,'DoEventSet('+IntToStr(xOID)+','+xParam.xName+')');
+      Execute_ObjectNotFound(xOID,'DoEventSet('+Int2WStr(xOID)+','+xParam.xName+')');
   except
     on E:Exception do
-      Execute_Exception(E,'DoEventSet('+IntToStr(xOID)+','+xParam.xName+')');
+      Execute_Exception(E,'DoEventSet('+Int2WStr(xOID)+','+xParam.xName+')');
     end;
   end;
 
@@ -1389,10 +1389,10 @@ procedure TRtcRemoteObjectManager.DoEventCall(Sender:TObject; xOID: TRtcObjectID
     if assigned(xLink) then
       xLink.DoEventCall(Sender,xParam)
     else
-      Execute_ObjectNotFound(xOID,'DoEventCall('+IntToStr(xOID)+','+xParam.xName+')');
+      Execute_ObjectNotFound(xOID,'DoEventCall('+Int2WStr(xOID)+','+xParam.xName+')');
   except
     on E:Exception do
-      Execute_Exception(E,'DoEventCall('+IntToStr(xOID)+','+xParam.xName+')');
+      Execute_Exception(E,'DoEventCall('+Int2WStr(xOID)+','+xParam.xName+')');
     end;
   end;
 
@@ -1405,10 +1405,10 @@ procedure TRtcRemoteObjectManager.DoMethodCall(Sender:TObject; xOID: TRtcObjectI
     if assigned(xLink) then
       xLink.DoMethodCall(Sender,xParam)
     else
-      Execute_ObjectNotFound(xOID,'DoMethodCall('+IntToStr(xOID)+','+xParam.xName+')');
+      Execute_ObjectNotFound(xOID,'DoMethodCall('+Int2WStr(xOID)+','+xParam.xName+')');
   except
     on E:Exception do
-      Execute_Exception(E,'DoMethodCall('+IntToStr(xOID)+','+xParam.xName+')');
+      Execute_Exception(E,'DoMethodCall('+Int2WStr(xOID)+','+xParam.xName+')');
     end;
   end;
 
@@ -1421,10 +1421,10 @@ procedure TRtcRemoteObjectManager.DoBroadcast(Sender: TObject; xOID: TRtcObjectI
     if assigned(xLink) then
       xLink.DoBroadcast(Sender,xParam)
     else
-      Execute_ObjectNotFound(xOID,'DoBroadcast('+IntToStr(xOID)+','+xParam.xName+')');
+      Execute_ObjectNotFound(xOID,'DoBroadcast('+Int2WStr(xOID)+','+xParam.xName+')');
   except
     on E:Exception do
-      Execute_Exception(E,'DoBroadcast('+IntToStr(xOID)+','+xParam.xName+')');
+      Execute_Exception(E,'DoBroadcast('+Int2WStr(xOID)+','+xParam.xName+')');
     end;
   end;
 
@@ -1485,7 +1485,7 @@ procedure TRtcRemoteObjectManager._Unsubscribe(const xLink: TRtcObjectLink; cons
         raise ERtcInfo.Create('Can not unsubscribe, no subscription active on this Object Manager.');
       o:=FChannels.search(xChannel);
       if o=nil then
-        raise ERtcInfo.Create('Can not unsubscribe, Channel "'+xChannel+'" not found on this Object Manager.');
+        raise ERtcInfo.Create('Can not unsubscribe, Channel "'+String(xChannel)+'" not found on this Object Manager.');
       objs:=tObjList(o);
       o:=objs.search(RtcIntPtr(xLink));
       if o=nil then
@@ -1499,7 +1499,7 @@ procedure TRtcRemoteObjectManager._Unsubscribe(const xLink: TRtcObjectLink; cons
 
         o:=SubscribeManagers.search(FBroadcastGroup+'.'+xChannel);
         if not assigned(o) then
-          raise ERtcInfo.Create('Can not unsubscribe, Channel "'+xChannel+'" not found for Group "'+FBroadcastGroup+'".');
+          raise ERtcInfo.Create('Can not unsubscribe, Channel "'+String(xChannel)+'" not found for Group "'+String(FBroadcastGroup)+'".');
         objs2:=tObjList(o);
         o:=objs2.search(RtcIntPtr(self));
         if o=nil then
@@ -1589,9 +1589,9 @@ procedure TRtcRemoteObjectManager.AddBroadcast(const xChannel:RtcWideString; xPa
         begin
         li:=TRtcObjectLink(o);
         if xParam.asObject=nil then
-          rec.asObject[RTCL_PFX_BROADCAST+IntToStr(li.OID)+xParam.xName]:=TRtcValue.Create
+          rec.asObject[RTCL_PFX_BROADCAST+Int2WStr(li.OID)+xParam.xName]:=TRtcValue.Create
         else
-          rec.asObject[RTCL_PFX_BROADCAST+IntToStr(li.OID)+xParam.xName]:=xParam.asObject.copyOf;
+          rec.asObject[RTCL_PFX_BROADCAST+Int2WStr(li.OID)+xParam.xName]:=xParam.asObject.copyOf;
         i:=objs.search_g(i,o);
         end;
 
@@ -1623,7 +1623,7 @@ procedure TRtcRemoteObjectManager.Execute_ObjectNotFound(xOID: TRtcObjectID; con
   begin
   if not assigned(FExRes) then
     FExRes:=TRtcArray.Create;
-  FExRes.asException[FExRes.Count]:=xMessage+': Object #'+IntToStr(xOID)+' not found';
+  FExRes.asException[FExRes.Count]:=xMessage+': Object #'+Int2WStr(xOID)+' not found';
   end;
 
 procedure TRtcRemoteObjectManager.Execute_BadFormat(const xMessage: RtcWideString);
@@ -1644,7 +1644,7 @@ procedure TRtcRemoteObjectManager.Execute_Exception(const E: Exception; const xM
   begin
   if not assigned(FExRes) then
     FExRes:=TRtcArray.Create;
-  FExRes.asException[FExRes.Count]:=xMessage+' - '+E.ClassName+': '+E.Message;
+  FExRes.asException[FExRes.Count]:=xMessage+' - '+RtcWideString(E.ClassName)+': '+RtcWideString(E.Message);
   end;
 
 procedure TRtcRemoteObjectManager.SetBroadcastGroup(const Value: RtcWideString);

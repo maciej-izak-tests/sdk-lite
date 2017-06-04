@@ -343,7 +343,11 @@ var
 // @exclude
 function Upper_Case(const s:RtcString):RtcString;
 // @exclude
-function Same_Text(const s1,s2:RtcString):boolean;
+function Same_Text(const s1,s2:RtcString):boolean; overload;
+{$IFDEF RTC_BYTESTRING}
+// @exclude
+function Same_Text(const s1,s2:RtcWideString):boolean; overload;
+{$ENDIF}
 
 // @exclude
 function Up_Case(const c:RtcChar):RtcChar;
@@ -5265,6 +5269,45 @@ function Same_Text(const s1,s2:RtcString):boolean;
   else
     Result:=True;
   end;
+
+{$IFDEF RTC_BYTESTRING}
+function Same_Text(const s1,s2:RtcWideString):boolean;
+  var
+    i:integer;
+    c,d:^RtcBinWideChar;
+    e,f:RtcBinWideChar;
+  begin
+  i:=length(s1);
+  if i<>length(s2) then
+    Result:=False
+  else if i>0 then
+    begin
+    Result:=True;
+    c:=@(s1[1]);
+    d:=@(s2[1]);
+    for i:=1 to i do
+      begin
+      if (c^>=CHR_A) and (c^<=CHR_Z) then
+        e:=c^ - 32
+      else
+        e:=c^;
+      if (d^>=CHR_A) and (d^<=CHR_Z) then
+        f:=d^ - 32
+      else
+        f:=d^;
+      if e<>f then
+        begin
+        Result:=False;
+        Break;
+        end;
+      Inc(d);
+      Inc(c);
+      end;
+    end
+  else
+    Result:=True;
+  end;
+{$ENDIF}
 
 function UpperCaseStr(const s:RtcWideString):RtcWideString;
   var

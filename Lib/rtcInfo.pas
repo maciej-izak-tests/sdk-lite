@@ -90,7 +90,7 @@ uses
 
 var
   // Full Name of the application or extension in which RTC is running.
-  AppFileName:String='';
+  AppFileName:RtcWideString='';
 
   // Log errors raised from RTC Value object classes?
   LOG_INFO_ERRORS:boolean={$IFDEF RTC_DEBUG}True{$ELSE}False{$ENDIF};
@@ -6866,7 +6866,12 @@ function Int2Str(i:integer):RtcString; overload;
 {$ENDIF}
 function Int2Str(i:int64):RtcString; overload;
 
+function Int2WStr(i:int64):RtcWideString;
+
 function Str2Int(const s:RtcString):integer; overload;
+{$IFDEF RTC_BYTESTRING}
+function Str2Int(const s:RtcWideString):integer; overload;
+{$ENDIF}
 function Str2IntDef(const s:RtcString; def:integer):integer; overload;
 function Str2LWord(const s:RtcString):Cardinal; overload;
 function Str2LWordDef(const s:RtcString; def:Cardinal):Cardinal; overload;
@@ -7149,7 +7154,7 @@ procedure TRtcObjectLink.DestroyOwner;
 procedure TRtcObjectLink.Subscribe(const xChannel:RtcWideString);
   begin
   if not assigned(FManager) then
-    raise ERtcObjectLinks.Create('Manager undefined, can NOT subscribe to channel "'+xChannel+'".');
+    raise ERtcObjectLinks.Create('Manager undefined, can NOT subscribe to channel "'+String(xChannel)+'".');
   if not assigned(FSubs) then
     FSubs:=tStringObjList.Create(8);
   if FSubs.search(xChannel)=nil then
@@ -7616,7 +7621,7 @@ function GetTickTime:Cardinal;
   var
     b: tms;
   begin
-  Result := fpTimes(b)*10;
+  Result := Cardinal(fpTimes(b)*10);
   end;
 {$ELSE}
   begin
@@ -7657,7 +7662,7 @@ function GetTempDirectory:RtcWideString;
     tempFolder: array[0..MAX_PATH] of Char;
   begin
   GetTempPath(MAX_PATH, @tempFolder);
-  result := StrPas(tempFolder);
+  result := RtcWideString(StrPas(tempFolder));
   end;
 {$ELSE}{$IFDEF POSIX}
   begin
@@ -7682,7 +7687,7 @@ function GetTempFile:RtcWideString;
   begin
   GetTempPath(MAX_PATH, @tempFolder);
   if GetTempFileName(@tempFolder, 'RTC', 0, @tempFile)<>0 then
-    result := StrPas(tempFile)
+    result := RtcWideString(StrPas(tempFile))
   else
     result := '';
   end;
@@ -9658,7 +9663,7 @@ function RtcWideStringToBytes(const Source:RtcWideString; loc:Integer=1; len:Int
         begin
         Result[i]:=RtcUnicodeToAnsiChar(Ord(Source[k]));
         if RTC_STRING_CHECK and (Result[i]=RTC_INVALID_CHAR) then
-          raise ERtcInfo.Create('RtcWideStringToBytes: String contains Unicode character #'+IntToStr(Ord(Source[k]))+' = '+Source[k]);
+          raise ERtcInfo.Create('RtcWideStringToBytes: String contains Unicode character #'+IntToStr(Ord(Source[k]))+' = '+Char(Source[k]));
         end
       else
         Result[i] := Byte(Source[k]);
@@ -9670,7 +9675,7 @@ function RtcWideStringToBytes(const Source:RtcWideString; loc:Integer=1; len:Int
     for i:=0 to len-1 do
       begin
       if Ord(Source[k])>255 then
-        raise ERtcInfo.Create('RtcWideStringToBytes: String contains Unicode character #'+IntToStr(Ord(Source[k]))+' = '+Source[k]);
+        raise ERtcInfo.Create('RtcWideStringToBytes: String contains Unicode character #'+IntToStr(Ord(Source[k]))+' = '+Char(Source[k]));
       Result[i] := Byte(Source[k]);
       Inc(k);
       end;
@@ -10698,6 +10703,11 @@ function Int2Str(i:int64):RtcString;
   Result:=RtcString(IntToStr(i));
   end;
 
+function Int2WStr(i:int64):RtcWideString;
+  begin
+  Result:=RtcWideString(IntToStr(i));
+  end;
+
 function Curr2Str(v:Currency):RtcString;
   var
     p:longint;
@@ -10726,6 +10736,13 @@ function Str2Int(const s:RtcString):integer;
   begin
   Result:=StrToInt(String(s));
   end;
+
+{$IFDEF RTC_BYTESTRING}
+function Str2Int(const s:RtcWideString):integer;
+  begin
+  Result:=StrToInt(String(s));
+  end;
+{$ENDIF}
 
 function Str2IntDef(const s:RtcString; def:integer):integer;
   begin
@@ -12574,7 +12591,7 @@ function JSON_DecodeString(const s:RtcWideString):RtcWideString;
       '0'..'9': Result:=Ord(ch)-Ord('0');
       'A'..'F': Result:=Ord(ch)-Ord('A')+10;
       'a'..'f': Result:=Ord(ch)-Ord('a')+10;
-      else raise ERtcInfo.Create('JSON Error: Bad Hex Char in escape sequence \'+Copy(s,a,10));
+      else raise ERtcInfo.Create('JSON Error: Bad Hex Char in escape sequence \'+String(Copy(s,a,10)));
       end;
     end;
 
@@ -12603,8 +12620,8 @@ function JSON_DecodeString(const s:RtcWideString):RtcWideString;
                 Inc(a,4);
                 Inc(b);
                 end
-             else raise ERtcInfo.Create('JSON Error: Escape sequence broken \'+Copy(s,a,10));
-        else raise ERtcInfo.Create('JSON Error: Unknown escape sequence \'+Copy(s,a,10));
+             else raise ERtcInfo.Create('JSON Error: Escape sequence broken \'+String(Copy(s,a,10)));
+        else raise ERtcInfo.Create('JSON Error: Unknown escape sequence \'+String(Copy(s,a,10)));
         end;
       Inc(a);
       end
@@ -12643,8 +12660,8 @@ function JSON_DecodeString(const s:RtcWideString):RtcWideString;
                 Inc(a,4); // skip hex value
                 Result[b]:=RtcWideChar(sb);
                 end
-             else raise ERtcInfo.Create('JSON Error: Escape sequence broken \'+Copy(s,a,10));
-        else raise ERtcInfo.Create('JSON Error: Unknown escape sequence \'+Copy(s,a,10));
+             else raise ERtcInfo.Create('JSON Error: Escape sequence broken \'+String(Copy(s,a,10)));
+        else raise ERtcInfo.Create('JSON Error: Unknown escape sequence \'+String(Copy(s,a,10)));
         end;
       Inc(a); // skip escape Char
       Inc(b);
@@ -12673,7 +12690,7 @@ class procedure TRtcValueObject.json_skipTag(const tag, s:RtcWideString; var at:
   begin
   json_skipWhitespace(s,at);
   if (at+length(tag)>length(s)) then
-    raise ERtcInfo.Create('JSON Error @'+IntToStr(at)+': Tag   '+tag+'   missing')
+    raise ERtcInfo.Create('JSON Error @'+IntToStr(at)+': Tag   '+String(tag)+'   missing')
   else
     begin
     ok:=True;
@@ -12686,7 +12703,7 @@ class procedure TRtcValueObject.json_skipTag(const tag, s:RtcWideString; var at:
     if ok then
       Inc(at, length(tag))
     else
-      raise ERtcInfo.Create('JSON Error @'+IntToStr(at)+': Tag   '+tag+'   expected --- Found     '+Copy(s,at+1,length(tag)+20));
+      raise ERtcInfo.Create('JSON Error @'+IntToStr(at)+': Tag   '+String(tag)+'   expected --- Found     '+String(Copy(s,at+1,length(tag)+20)));
     end;
   end;
 
@@ -13028,7 +13045,7 @@ class function TRtcValueObject.json_checkStrType(const s:RtcWideString; const at
           Result:=rtc_String
         else if (Pos('.',s2)<=0) and (Pos('E',s2)<=0) and (Pos('e',s2)<=0) then
           begin
-          if StrToInt64Def(s2,RtcMaxLargeInt)<>RtcMaxLargeInt then
+          if StrToInt64Def(String(s2),RtcMaxLargeInt)<>RtcMaxLargeInt then
             Result:=rtc_LargeInt
           else
             Result:=rtc_String;
@@ -13089,10 +13106,10 @@ class function TRtcValueObject.json_readString(const s:RtcWideString; var at: in
           't': Inc(at2); // #9
           'u': begin
                if at2+5<=len then Inc(at2,5)
-               else raise ERtcInfo.Create('JSON Error @'+IntToStr(at2)+': Escape sequence broken \'+Copy(s,at2,10));
+               else raise ERtcInfo.Create('JSON Error @'+IntToStr(at2)+': Escape sequence broken \'+String(Copy(s,at2,10)));
                end;
           else
-            raise ERtcInfo.Create('JSON Error @'+IntToStr(at2)+': Unknown escape sequence \'+Copy(s,at2,10));
+            raise ERtcInfo.Create('JSON Error @'+IntToStr(at2)+': Unknown escape sequence \'+String(Copy(s,at2,10)));
           end;
         end
       else if s[at2]='"' then
@@ -14069,7 +14086,7 @@ procedure TRtcExceptionValue.SetException(const Value:RtcWideString);
     mstring:=Value;
     end;
 
-  FCode:=StrToIntDef(mcode,0);
+  FCode:=StrToIntDef(String(mcode),0);
   FMessage:=mstring;
   end;
 
@@ -14125,7 +14142,7 @@ function TRtcExceptionValue.SetVariant(const Value: Variant): boolean;
 function TRtcExceptionValue.GetException:RtcWideString;
   begin
   if FCode<>0 then
-    Result:='#'+IntToStr(FCode)+':'+FMessage
+    Result:='#'+Int2WStr(FCode)+':'+FMessage
   else
     Result:=FMessage;
   end;
@@ -15717,7 +15734,7 @@ function TRtcWideStringValue.GetInteger: rtcInteger;
   if FValue='' then
     Result:=0
   else
-    Result:=StrToInt(FValue);
+    Result:=StrToInt(String(FValue));
   end;
 
 function TRtcWideStringValue.GetCardinal: rtcCardinal;
@@ -15725,7 +15742,7 @@ function TRtcWideStringValue.GetCardinal: rtcCardinal;
   if FValue='' then
     Result:=0
   else
-    Result:=StrToInt64(FValue);
+    Result:=StrToInt64(String(FValue));
   end;
 
 function TRtcWideStringValue.GetLargeInt: rtcLargeInt;
@@ -15733,7 +15750,7 @@ function TRtcWideStringValue.GetLargeInt: rtcLargeInt;
   if FValue='' then
     Result:=0
   else
-    Result:=StrToInt64(FValue);
+    Result:=StrToInt64(String(FValue));
   end;
 
 function TRtcWideStringValue.GetFloat: rtcFloat;
@@ -15980,7 +15997,7 @@ function TRtcTextValue.GetInteger: rtcInteger;
   if FValue='' then
     Result:=0
   else
-    Result:=StrToInt(GetText);
+    Result:=StrToInt(String(GetText));
   end;
 
 function TRtcTextValue.GetCardinal: rtcCardinal;
@@ -15988,7 +16005,7 @@ function TRtcTextValue.GetCardinal: rtcCardinal;
   if FValue='' then
     Result:=0
   else
-    Result:=StrToInt64(GetText);
+    Result:=StrToInt64(String(GetText));
   end;
 
 function TRtcTextValue.GetLargeInt: rtcLargeInt;
@@ -15996,7 +16013,7 @@ function TRtcTextValue.GetLargeInt: rtcLargeInt;
   if FValue='' then
     Result:=0
   else
-    Result:=StrToInt64(GetText);
+    Result:=StrToInt64(String(GetText));
   end;
 
 function TRtcTextValue.GetFloat: rtcFloat;
@@ -16215,12 +16232,12 @@ function TRtcIntegerValue.GetString: RtcString;
 
 function TRtcIntegerValue.GetText:RtcWideString;
   begin
-  Result:=IntToStr(FValue);
+  Result:=Int2WStr(FValue);
   end;
 
 function TRtcIntegerValue.GetWideString: RtcWideString;
   begin
-  Result:=RtcWideString(IntToStr(FValue));
+  Result:=Int2WStr(FValue);
   end;
 
 class function TRtcIntegerValue.NullValue: rtcInteger;
@@ -16286,7 +16303,7 @@ procedure TRtcIntegerValue.from_JSON(const s:RtcWideString; var at: integer; con
   if data='' then
     FValue:=0
   else
-    FValue:=StrToInt(data);
+    FValue:=StrToInt(String(data));
   end;
 
 procedure TRtcIntegerValue.to_XMLrpc(const Result:TRtcHugeString);
@@ -16432,12 +16449,12 @@ function TRtcCardinalValue.GetString: RtcString;
 
 function TRtcCardinalValue.GetText:RtcWideString;
   begin
-  Result:=IntToStr(FValue);
+  Result:=Int2WStr(FValue);
   end;
 
 function TRtcCardinalValue.GetWideString: RtcWideString;
   begin
-  Result:=RtcWideString(IntToStr(FValue));
+  Result:=Int2WStr(FValue);
   end;
 
 class function TRtcCardinalValue.NullValue: rtcCardinal;
@@ -16503,7 +16520,7 @@ procedure TRtcCardinalValue.from_JSON(const s:RtcWideString; var at: integer; co
   if data='' then
     FValue:=0
   else
-    FValue:=StrToInt64(data);
+    FValue:=StrToInt64(String(data));
   end;
 
 procedure TRtcCardinalValue.to_XMLrpc(const Result:TRtcHugeString);
@@ -16627,12 +16644,12 @@ function TRtcLargeIntValue.GetString: RtcString;
 
 function TRtcLargeIntValue.GetText:RtcWideString;
   begin
-  Result:=IntToStr(FValue);
+  Result:=Int2WStr(FValue);
   end;
 
 function TRtcLargeIntValue.GetWideString: RtcWideString;
   begin
-  Result:=RtcWideString(IntToStr(FValue));
+  Result:=Int2WStr(FValue);
   end;
 
 class function TRtcLargeIntValue.NullValue: rtcLargeInt;
@@ -16698,7 +16715,7 @@ procedure TRtcLargeIntValue.from_JSON(const s:RtcWideString; var at: integer; co
   if data='' then
     FValue:=0
   else
-    FValue:=StrToInt64(data);
+    FValue:=StrToInt64(String(data));
   end;
 
 procedure TRtcLargeIntValue.from_XMLrpc(const s: RtcString; var at: integer; const MaxDepth:integer=RTC_PARSERS_MAXDEPTH);
@@ -16855,12 +16872,12 @@ function TRtcOIDValue.GetString: RtcString;
 
 function TRtcOIDValue.GetText:RtcWideString;
   begin
-  Result:=IntToStr(FValue);
+  Result:=Int2WStr(FValue);
   end;
 
 function TRtcOIDValue.GetWideString: RtcWideString;
   begin
-  Result:=RtcWideString(IntToStr(FValue));
+  Result:=Int2WStr(FValue);
   end;
 
 class function TRtcOIDValue.NullValue: TRtcObjectID;
@@ -16926,7 +16943,7 @@ procedure TRtcOIDValue.from_JSON(const s:RtcWideString; var at: integer; const M
   if data='' then
     FValue:=0
   else
-    FValue:=StrToInt64(data);
+    FValue:=StrToInt64(String(data));
   end;
 
 procedure TRtcOIDValue.from_XMLrpc(const s: RtcString; var at: integer; const MaxDepth:integer=RTC_PARSERS_MAXDEPTH);
@@ -23168,7 +23185,7 @@ procedure TRtcFunctionInfo.from_RequestHeaders(Request:TRtcRequest; const SessID
               begin
               if (length(iValue)<=20) and
                  (PosWEx(iValue[length(iValue)],RTC_NUMBER)>0) and
-                 (StrToInt64Def(iValue,RtcMaxLargeInt)<>RtcMaxLargeInt) then
+                 (StrToInt64Def(String(iValue),RtcMaxLargeInt)<>RtcMaxLargeInt) then
                 arr.asJSON[i]:=iValue
               else
                 arr.asText[i]:=iValue;
@@ -23274,9 +23291,9 @@ procedure TRtcFunctionInfo.from_RequestHeaders(Request:TRtcRequest; const SessID
 
       i:=1;
       if (SessIDField<>'') and (iValue[1]<>'{') and (iValue[1]<>'[') then
-        if SameText(Utf8Decode(Copy(iValue,1,length(SessIDField)+1)), Utf8Decode(SessIDField+'=')) then
+        if SameText(String(Utf8Decode(RtcString(Copy(iValue,1,length(SessIDField)+1)))), String(Utf8Decode(SessIDField+'='))) then
           begin
-          i:=PosEx('&',iValue,1+length(SessIDField));
+          i:=PosWEx('&',iValue,1+length(SessIDField));
           if i>0 then Inc(i) else i:=1;
           end;
 
@@ -23340,7 +23357,7 @@ procedure TRtcFunctionInfo.from_RequestHeaders(Request:TRtcRequest; const SessID
     for a:=0 to Request.Query.ItemCount-1 do
       begin
       iName:=Utf8Decode(URL_Decode(Request.Query.ItemName[a]));
-      if (iName<>'') and not SameText(iName,Utf8Decode(SessIDField)) then
+      if (iName<>'') and not SameText(String(iName),String(Utf8Decode(SessIDField))) then
         begin
         iValue:=Utf8Decode(URL_Decode(Request.Query.ItemValue[a]));
         if iValue='' then
@@ -23411,7 +23428,7 @@ procedure TRtcFunctionInfo.from_RequestHeaders(Request:TRtcRequest; const SessID
                 begin
                 if (length(iValue)<=20) and
                    (PosWEx(iValue[length(iValue)],RTC_NUMBER)>0) and
-                   (StrToInt64Def(iValue,RtcMaxLargeInt)<>RtcMaxLargeInt) then
+                   (StrToInt64Def(String(iValue),RtcMaxLargeInt)<>RtcMaxLargeInt) then
                   asJSON[iName]:=iValue
                 else
                   asText[iName]:=iValue;
@@ -25963,7 +25980,7 @@ function TRtcFunctionInfo.MakeFunction(index: integer; const func_name:RtcWideSt
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcFunctionInfo.MakeFunction('+IntToStr(index)+',"'+func_name+'")',E,'INFO');
+        Log('TRtcFunctionInfo.MakeFunction('+Int2WStr(index)+',"'+func_name+'")',E,'INFO');
       RtcFreeAndNil(Result);
       raise;
       end;
@@ -27561,7 +27578,7 @@ function TRtcAbsArray.NewFunction(index: integer; const func_name:RtcWideString=
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcAbsArray.NewFunction('+IntToStr(index)+',"'+func_name+'")',E,'INFO');
+        Log('TRtcAbsArray.NewFunction('+Int2WStr(index)+',"'+func_name+'")',E,'INFO');
       RtcFreeAndNil(Result);
       raise;
       end;
@@ -30796,7 +30813,7 @@ procedure TRtcInfo.SetNil(const index:RtcWideString);
         if LOG_INFO_ERRORS then
           begin
           try
-            cname:=gobj.ClassName;
+            cname:=RtcWideString(gobj.ClassName);
           except
             cname:='?';
             end;
@@ -33295,7 +33312,7 @@ LastTickTime:=GetTickTime;
 TickTimeOverflow:=0;
 TickTimeCS:=TRtcCritSec.Create;
 
-AppFileName:=ExpandUNCFileName(ParamStr(0));
+AppFileName:=ExpandUNCFileName(RtcWideString(ParamStr(0)));
 
 {$IFDEF RTC_FORMATSET}
   {$IFDEF FPC}

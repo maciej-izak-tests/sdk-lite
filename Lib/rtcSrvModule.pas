@@ -1019,7 +1019,7 @@ procedure TRtcBaseServerModule.Call_RequestAccepted(Sender: TRtcConnection);
     on E:Exception do
       with TRtcValueResult.Create(nil) do
         try
-          asException:=E.Message;
+          asException:=RtcWideString(E.Message);
           if Sender.Request.Info.isType[SERVE_XML]=rtc_Integer then
             begin
             if asErrorCode=0 then
@@ -1058,7 +1058,7 @@ procedure TRtcBaseServerModule.Call_ResponseDone(Sender: TRtcConnection);
     on E:Exception do
       with TRtcValueResult.Create(nil) do
         try
-          asException:=E.Message;
+          asException:=RtcWideString(E.Message);
           if Sender.Request.Info.isType[SERVE_XML]=rtc_Integer then
             begin
             if asErrorCode=0 then
@@ -1097,7 +1097,7 @@ procedure TRtcBaseServerModule.Call_Disconnect(Sender: TRtcConnection);
     on E:Exception do
       with TRtcValueResult.Create(nil) do
         try
-          asException:=E.Message;
+          asException:=RtcWideString(E.Message);
           if Sender.Request.Info.isType[SERVE_XML]=rtc_Integer then
             begin
             if asErrorCode=0 then
@@ -1186,7 +1186,7 @@ function TRtcBaseServerModule.MakeObjectManager(Sender:TRtcConnection; xCreate:b
       Sender.Session.KeepAlive:=AutoSessionsLive;
       Sender.Response.Cookie.Value[SessIDField]:=Sender.Session.ID;
       Result:=TRtcServerObjectManager.Create(True);
-      Result.BroadcastGroup:=String(FObjManSesName);
+      Result.BroadcastGroup:=RtcWideString(FObjManSesName);
       Sender.Session._asObj[FObjManSesName]:=Result;
       end
     else
@@ -1197,7 +1197,7 @@ function TRtcBaseServerModule.MakeObjectManager(Sender:TRtcConnection; xCreate:b
     if xCreate then
       begin
       Result:=TRtcServerObjectManager.Create(True);
-      Result.BroadcastGroup:=String(FObjManSesName);
+      Result.BroadcastGroup:=RtcWideString(FObjManSesName);
       Sender.Session._asObj[FObjManSesName]:=Result;
       end
     else
@@ -2442,7 +2442,7 @@ procedure TRtcBaseServerModule.ProcessDataReceived(Sender: TRtcConnection);
         on E:Exception do
           with TRtcValueResult.Create(nil) do
             try
-              asException:=E.Message;
+              asException:=RtcWideString(E.Message);
               if asErrorCode=0 then
                 if parseError then
                   asErrorCode:=RTC_ERROR_PARSE
@@ -3463,7 +3463,7 @@ function TRtcDelayedCallJob.Run(Thr:TRtcThread):boolean;
           on E:Exception do
             with TRtcValueResult.Create(nil) do
               try
-                asException:=E.Message;
+                asException:=RtcWideString(E.Message);
                 if assigned(call.output) then
                   to_Code(call.output)
                 else

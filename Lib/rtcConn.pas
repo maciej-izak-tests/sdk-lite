@@ -4843,11 +4843,13 @@ procedure TRtcConnection.ActivateObjectManager(xCreate:boolean=True);
 
 function TRtcConnection.FindSession(const ID:RtcString):boolean;
   begin
+{$IFDEF FPC} Result:=False; {$ENDIF}
   raise ERtcConnection.Create('"FindSession" method not supported by '+ClassName);
   end;
 
 function TRtcConnection.HaveSession(const ID:RtcString):boolean;
   begin
+{$IFDEF FPC} Result:=False; {$ENDIF}
   raise ERtcConnection.Create('"HaveSession" method not supported by '+ClassName);
   end;
 
@@ -4863,6 +4865,7 @@ procedure TRtcConnection.OpenSession(LockType:TRtcSessionLockType=sesFwdLock);
 
 function TRtcConnection.CloseSession(const ID:RtcString):boolean;
   begin
+{$IFDEF FPC} Result:=False; {$ENDIF}
   raise ERtcConnection.Create('"CloseSession" method not supported by '+ClassName);
   end;
 
@@ -4893,6 +4896,7 @@ procedure TRtcConnection.SetReconnectOn(const Value: TRtcReconnectParam);
 
 function TRtcConnection.GetReconnectOn:TRtcReconnectParam;
   begin
+{$IFDEF FPC} Result:=nil; {$ENDIF}
   raise ERtcConnection.Create('"ReconnectOn" property not supported by '+ClassName);
   end;
 
@@ -4903,21 +4907,25 @@ procedure TRtcConnection.SetRestartOn(const Value: TRtcRestartParam);
 
 function TRtcConnection.GetRestartOn:TRtcRestartParam;
   begin
+{$IFDEF FPC} Result:=nil; {$ENDIF}
   raise ERtcConnection.Create('"RestartOn" property not supported by '+ClassName);
   end;
 
 function TRtcConnection.GetResponse:TRtcResponse;
   begin
+{$IFDEF FPC} Result:=nil; {$ENDIF}
   raise ERtcConnection.Create('"Response" property not supported by '+ClassName);
   end;
 
 function TRtcConnection.GetRequest:TRtcRequest;
   begin
+{$IFDEF FPC} Result:=nil; {$ENDIF}
   raise ERtcConnection.Create('"Request" property not supported by '+ClassName);
   end;
 
 function TRtcConnection.GetSession:TRtcSession;
   begin
+{$IFDEF FPC} Result:=nil; {$ENDIF}
   raise ERtcConnection.Create('"Session" property not supported by '+ClassName);
   end;
 
@@ -4933,6 +4941,7 @@ procedure TRtcConnection.SetResponse(const Value:TRtcResponse);
 
 function TRtcConnection.GetObjectManager:TRtcRemoteObjectManager;
   begin
+{$IFDEF FPC} Result:=nil; {$ENDIF}
   raise ERtcConnection.Create('"GetObjectManager" method not supported by '+ClassName);
   end;
 

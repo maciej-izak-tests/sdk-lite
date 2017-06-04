@@ -62,7 +62,7 @@ var
     If you want LOG files to be created in the same folder as AppFile (EXE/DLL),
     set LOG_FOLDER to an empty String before calling "StartLog".
     For this value to have any effect, you need to set it before calling "StartLog". }
-  LOG_FOLDER:String='LOG';
+  LOG_FOLDER:RtcWideString='LOG';
 
   { Full path to the LOG folder. If you leave this variable empty (default),
     it will be initialized automatically by using the AppFileName and LOG_FOLDER
@@ -70,7 +70,7 @@ var
     If you want your LOG files written to a specific folder by using full path,
     you can do it by setting this variable before the first Log entry is written.
     RTC_LOG_FOLDER should ALWAYS end with '\' on Windows and '/' on other platforms. }
-  RTC_LOG_FOLDER:String='';
+  RTC_LOG_FOLDER:RtcWideString='';
 
   { String used to format Date/Time output in RTC LOG. For more information on valid Data/Time
     format strings, please refer to Delphi help about the "FormatDataTime" function. }
@@ -154,7 +154,7 @@ var
   LogCurBuff:longint;
   LogBuff:TStringObjList;
   AppOnlyFileName,
-  AppOnlyFilePath:String;
+  AppOnlyFilePath:RtcWideString;
 
 procedure StartLog;
   begin
@@ -177,12 +177,12 @@ procedure Delete_old_logs;
     vdate:= Now - RTC_LOGS_LIVE_DAYS;
     if FindFirst(RTC_LOG_FOLDER + '*.log', faAnyFile - faDirectory, sr) = 0 then
       repeat
-        intFileAge := FileAge(RTC_LOG_FOLDER + sr.name);
+        intFileAge := FileAge(RTC_LOG_FOLDER + RtcWideString(sr.name));
         if intFileAge > -1 then
           begin
           myfileage:= FileDateToDateTime(intFileAge);
           if myfileage < vdate then
-            Delete_File(RTC_LOG_FOLDER + sr.name);
+            Delete_File(RTC_LOG_FOLDER + RtcWideString(sr.name));
           end;
         until (FindNext(sr) <> 0);
   finally
@@ -190,7 +190,7 @@ procedure Delete_old_logs;
     end;
   end;
 
-procedure File_AppendEx(const fname:String; const Data:RtcByteArray);
+procedure File_AppendEx(const fname:RtcWideString; const Data:RtcByteArray);
   var
     f:TRtcFileHdl;
   begin
@@ -214,7 +214,7 @@ procedure File_AppendEx(const fname:String; const Data:RtcByteArray);
       end;
   end;
 
-procedure File_Append(const fname:String; const Data:RtcString);
+procedure File_Append(const fname:RtcWideString; const Data:RtcString);
   var
     f:TRtcFileHdl;
   begin
@@ -245,7 +245,7 @@ procedure File_Append(const fname:String; const Data:RtcString);
 procedure PrepareLogFolder;
   begin
   if AppFileName='' then
-    AppFileName:=ExpandUNCFileName(ParamStr(0));
+    AppFileName:=ExpandUNCFileName(RtcWideString(ParamStr(0)));
 
   if AppOnlyFileName='' then
     begin
@@ -282,19 +282,19 @@ procedure PrepareLogFolder;
       end;
   end;
 
-procedure WriteToLogEx(const ext:String; const text:RtcByteArray);
+procedure WriteToLogEx(const ext:RtcWideString; const text:RtcByteArray);
   begin
   PrepareLogFolder;
   File_AppendEx(RTC_LOG_FOLDER+AppOnlyFileName+'.'+ext, text);
   end;
 
-procedure WriteToLog(const ext:String; const text:RtcString);
+procedure WriteToLog(const ext:RtcWideString; const text:RtcString);
   begin
   PrepareLogFolder;
   File_Append(RTC_LOG_FOLDER+AppOnlyFileName+'.'+ext, text);
   end;
 
-procedure WriteToBuffEx(const ext:String; const text:RtcByteArray);
+procedure WriteToBuffEx(const ext:RtcWideString; const text:RtcByteArray);
   var
     obj:TObject;
     data:TRtcHugeByteArray;
@@ -313,7 +313,7 @@ procedure WriteToBuffEx(const ext:String; const text:RtcByteArray);
     DumpLogBuffers;
   end;
 
-procedure WriteToBuff(const ext:String; const text:RtcString);
+procedure WriteToBuff(const ext:RtcWideString; const text:RtcString);
   var
     obj:TObject;
     data:TRtcHugeByteArray;
@@ -350,7 +350,7 @@ procedure StartLogBuffers(MaxSize:longint);
 
 procedure DumpLogBuffers;
   var
-    s:String;
+    s:RtcWideString;
     obj:TObject;
     data:TRtcHugeByteArray;
   begin
@@ -394,7 +394,7 @@ procedure StopLogBuffers;
 procedure XLog(const s:RtcWideString; const name:String='');
   var
     d:TDateTime;
-    fname:String;
+    fname:RtcWideString;
     s2:RtcString;
   begin
   if not doLog then Exit; // Exit here !!!!
@@ -403,9 +403,9 @@ procedure XLog(const s:RtcWideString; const name:String='');
   if RTC_LOG_DATETIMEFORMAT<>'' then
     begin
     if RTC_LOG_THREADID then
-      s2:= Utf8Encode(IntToStr(Cardinal(GetCurrentThreadId))+'#'+FormatDateTime(RTC_LOG_DATETIMEFORMAT,d))
+      s2:= Utf8Encode(RtcWideString(IntToStr(Cardinal(GetCurrentThreadId))+'#'+FormatDateTime(RTC_LOG_DATETIMEFORMAT,d)))
     else
-      s2:= Utf8Encode(FormatDateTime(RTC_LOG_DATETIMEFORMAT,d));
+      s2:= Utf8Encode(RtcWideString(FormatDateTime(RTC_LOG_DATETIMEFORMAT,d)));
     end
   else if RTC_LOG_THREADID then
     s2:= Int2Str(Cardinal(GetCurrentThreadId))+'#'
@@ -413,9 +413,9 @@ procedure XLog(const s:RtcWideString; const name:String='');
     s2:= '';
 
   if name<>'' then
-    fname:=FormatDateTime('yyyy_mm_dd',d)+'.'+name+'.log'
+    fname:=RtcWideString(FormatDateTime('yyyy_mm_dd',d)+'.'+name)+'.log'
   else
-    fname:=FormatDateTime('yyyy_mm_dd',d)+'.log';
+    fname:=RtcWideString(FormatDateTime('yyyy_mm_dd',d))+'.log';
 
   ThrCS.Acquire;
   try
@@ -433,7 +433,7 @@ procedure XLog(const s:RtcWideString; const name:String='');
 procedure Log(const s:RtcWideString; const name:String='');
   var
     d:TDateTime;
-    fname:String;
+    fname:RtcWideString;
     s2:RtcString;
   begin
   if not doLog then Exit; // Exit here !!!!
@@ -442,9 +442,9 @@ procedure Log(const s:RtcWideString; const name:String='');
   if RTC_LOG_DATETIMEFORMAT<>'' then
     begin
     if RTC_LOG_THREADID then
-      s2:=Utf8Encode(IntToStr(Cardinal(GetCurrentThreadId))+'#'+FormatDateTime(RTC_LOG_DATETIMEFORMAT,d))
+      s2:=Utf8Encode(RtcWideString(IntToStr(Cardinal(GetCurrentThreadId))+'#'+FormatDateTime(RTC_LOG_DATETIMEFORMAT,d)))
     else
-      s2:=Utf8Encode(FormatDateTime(RTC_LOG_DATETIMEFORMAT,d));
+      s2:=Utf8Encode(RtcWideString(FormatDateTime(RTC_LOG_DATETIMEFORMAT,d)));
     end
   else if RTC_LOG_THREADID then
     s2:=Int2Str(Cardinal(GetCurrentThreadId))+'#'
@@ -452,7 +452,7 @@ procedure Log(const s:RtcWideString; const name:String='');
     s2:='';
 
   if name<>'' then
-    fname:=name+'.log'
+    fname:=RtcWideString(name)+'.log'
   else
     fname:='log';
 
@@ -472,7 +472,7 @@ procedure Log(const s:RtcWideString; const name:String='');
 procedure Log(const s:RtcWideString; E:Exception; const name:String='');
   begin
   if LOG_EXCEPTIONS then
-    Log(s+' Exception! '+E.ClassName+': '+E.Message, name);
+    Log(s+' Exception! '+RtcWideString(E.ClassName)+': '+RtcWideString(E.Message), name);
   end;
 
 {$IFDEF RTC_BYTESTRING}
@@ -480,7 +480,7 @@ procedure Log(const s:RtcWideString; E:Exception; const name:String='');
 procedure XLog(const s:RtcString; const name:String='');
   var
     d:TDateTime;
-    fname:String;
+    fname:RtcWideString;
     s2:RtcString;
   begin
   if not doLog then Exit; // Exit here !!!!
@@ -489,9 +489,9 @@ procedure XLog(const s:RtcString; const name:String='');
   if RTC_LOG_DATETIMEFORMAT<>'' then
     begin
     if RTC_LOG_THREADID then
-      s2:= Utf8Encode(IntToStr(Cardinal(GetCurrentThreadId))+'#'+FormatDateTime(RTC_LOG_DATETIMEFORMAT,d))
+      s2:= Utf8Encode(RtcWideString(IntToStr(Cardinal(GetCurrentThreadId))+'#'+FormatDateTime(RTC_LOG_DATETIMEFORMAT,d)))
     else
-      s2:= Utf8Encode(FormatDateTime(RTC_LOG_DATETIMEFORMAT,d));
+      s2:= Utf8Encode(RtcWideString(FormatDateTime(RTC_LOG_DATETIMEFORMAT,d)));
     end
   else if RTC_LOG_THREADID then
     s2:= Int2Str(Cardinal(GetCurrentThreadId))+'#'
@@ -499,9 +499,9 @@ procedure XLog(const s:RtcString; const name:String='');
     s2:= '';
 
   if name<>'' then
-    fname:=FormatDateTime('yyyy_mm_dd',d)+'.'+name+'.log'
+    fname:=RtcWideString(FormatDateTime('yyyy_mm_dd',d)+'.'+name)+'.log'
   else
-    fname:=FormatDateTime('yyyy_mm_dd',d)+'.log';
+    fname:=RtcWideString(FormatDateTime('yyyy_mm_dd',d))+'.log';
 
   ThrCS.Acquire;
   try
@@ -519,7 +519,7 @@ procedure XLog(const s:RtcString; const name:String='');
 procedure Log(const s:RtcString; const name:String='');
   var
     d:TDateTime;
-    fname:String;
+    fname:RtcWideString;
     s2:RtcString;
   begin
   if not doLog then Exit; // Exit here !!!!
@@ -528,9 +528,9 @@ procedure Log(const s:RtcString; const name:String='');
   if RTC_LOG_DATETIMEFORMAT<>'' then
     begin
     if RTC_LOG_THREADID then
-      s2:=Utf8Encode(IntToStr(Cardinal(GetCurrentThreadId))+'#'+FormatDateTime(RTC_LOG_DATETIMEFORMAT,d))
+      s2:=Utf8Encode(RtcWideString(IntToStr(Cardinal(GetCurrentThreadId))+'#'+FormatDateTime(RTC_LOG_DATETIMEFORMAT,d)))
     else
-      s2:=Utf8Encode(FormatDateTime(RTC_LOG_DATETIMEFORMAT,d));
+      s2:=Utf8Encode(RtcWideString(FormatDateTime(RTC_LOG_DATETIMEFORMAT,d)));
     end
   else if RTC_LOG_THREADID then
     s2:=Int2Str(Cardinal(GetCurrentThreadId))+'#'
@@ -538,7 +538,7 @@ procedure Log(const s:RtcString; const name:String='');
     s2:='';
 
   if name<>'' then
-    fname:=name+'.log'
+    fname:=RtcWideString(name)+'.log'
   else
     fname:='log';
 
@@ -565,15 +565,15 @@ procedure Log(const s:RtcString; E:Exception; const name:String='');
 { Copy LOG file "fromName" to LOG file "toName". }
 procedure Copy_Log(const fromName,toName:String);
   var
-    xname,fname,tname:String;
+    xname,fname,tname:RtcWideString;
     cnt:integer;
   begin
   if not doLog then Exit; // Exit here !!!!
   if fromName=toName then Exit; // and here !!!!
 
   PrepareLogFolder;
-  if fromName='' then fname:='log' else fname:=fromName+'.log';
-  if toName=''   then tname:='log' else tname:=toName+'.log';
+  if fromName='' then fname:='log' else fname:=RtcWideString(fromName)+'.log';
+  if toName=''   then tname:='log' else tname:=RtcWideString(toName)+'.log';
 
   DumpLogBuffers;
 
@@ -590,13 +590,13 @@ procedure Copy_Log(const fromName,toName:String);
 { Delete LOG file "name" }
 procedure Delete_Log(const name:String);
   var
-    xname,fname:String;
+    xname,fname:RtcWideString;
     cnt:integer;
   begin
   if not doLog then Exit; // Exit here !!!!
 
   PrepareLogFolder;
-  if name='' then fname:='log' else fname:=name+'.log';
+  if name='' then fname:='log' else fname:=RtcWideString(name)+'.log';
 
   DumpLogBuffers;
 

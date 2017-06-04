@@ -741,10 +741,10 @@ function TRtcFunctionGroup.ExecuteData(CmdInfo: TRtcCommandInfo; Data: TRtcValue
         if CmdInfo.Command.Function_Exists(TRtcFunctionInfo(Data).FunctionName) then
           CmdInfo.Command.Call_Execute(CmdInfo, TRtcFunctionInfo(Data), TRtcValue(Result))
         else if not CallFunction(CmdInfo, TRtcFunctionInfo(Data), TRtcValue(Result), recursive) then
-          raise ERtcBadFunctionName.Create('Function or Command '#39+RtcWideString(TRtcFunctionInfo(Data).FunctionName)+#39' not found.');
+          raise ERtcBadFunctionName.Create('Function or Command '#39+String(TRtcFunctionInfo(Data).FunctionName)+#39' not found.');
         end
       else if not CallFunction(CmdInfo, TRtcFunctionInfo(Data), TRtcValue(Result), recursive) then
-        raise ERtcBadFunctionName.Create('Function '#39+RtcWideString(TRtcFunctionInfo(Data).FunctionName)+#39' not found.');
+        raise ERtcBadFunctionName.Create('Function '#39+String(TRtcFunctionInfo(Data).FunctionName)+#39' not found.');
     except
       RtcFreeAndNil(Result);
       raise;
@@ -876,13 +876,13 @@ function TRtcFunction.Call_Execute(const CmdInfo: TRtcCommandInfo;
                                    const Param: TRtcFunctionInfo;
                                    const Res: TRtcValue):boolean;
   begin
-  if SameText(Param.FunctionName,FunctionName) then
+  if Same_Text(Param.FunctionName,FunctionName) then
     begin
     Result:=True;
     if assigned(FOnExecute) then
       FOnExecute(CmdInfo.Sender,Param,Res)
     else
-      raise Exception.Create('OnExecute event missing for function "'+RtcWideString(FunctionName)+'".');
+      raise Exception.Create('OnExecute event missing for function "'+String(FunctionName)+'".');
     end
   else
     Result:=False;
@@ -890,7 +890,7 @@ function TRtcFunction.Call_Execute(const CmdInfo: TRtcCommandInfo;
 
 function TRtcFunction.Function_Exists(const Function_Name: RtcWideString): boolean;
   begin
-  Result:= SameText(FunctionName, Function_Name);
+  Result:= Same_Text(FunctionName, Function_Name);
   end;
 
 function TRtcFunction.GetFuncName: RtcWideString;

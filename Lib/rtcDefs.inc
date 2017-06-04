@@ -632,6 +632,9 @@
 
 {$IFDEF FPC}
   {$mode delphi}
+  {$IFDEF VER3}
+    {$DEFINE FPC_UNICODE}
+  {$ENDIF}
   {$PACKRECORDS 1}
   {$HINTS OFF}
   {$DEFINE RTC_NOISAPI}

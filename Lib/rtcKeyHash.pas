@@ -682,11 +682,11 @@ begin
 
   t := 64 - (t and $3f); { Space available in ctx.in (at least 1) }
   if Cardinal(t) > Cardinal(len) then begin
-    Move(buf^, Pointer(Cardinal(@ctx.in_) + 64 - t)^, len);
+    Move(buf^, Pointer(RtcIntPtr(@ctx.in_) + 64 - t)^, len);
     Exit;
   end;
   { First chunk is an odd size }
-  Move(buf^, Pointer(Cardinal(@ctx.in_) + 64 - t)^, t);
+  Move(buf^, Pointer(RtcIntPtr(@ctx.in_) + 64 - t)^, t);
   SHA1Transform(ctx.buf, ctx.in_, ctx.W);
   Inc(buf, t);
   Dec(len, t);

@@ -111,6 +111,7 @@ implementation
 const
   CRLF=RtcString(#13#10);
   END_MARK=RtcString(#13#10#13#10);
+  S_WEBSOCKET=RtcString('WEBSOCKET');
 
 { TRtcSocketHttpServerProvider }
 
@@ -388,7 +389,7 @@ procedure TRtcSocketHttpServerProvider.TriggerDataReceived;
               else if s='KEEP-ALIVE' then
                 Request.Close:=False
               else if PosEx('UPGRADE',s)>0 then
-                if Same_Text(Request.ValueCS['UPGRADE'],'WEBSOCKET') then
+                if Same_Text(Request.ValueCS['UPGRADE'],S_WEBSOCKET) then
                   Request.WSUpgrade:=True;
               end;
 
@@ -745,7 +746,7 @@ procedure TRtcSocketHttpServerProvider.WriteHeader(SendNow:boolean=True);
   if Request.WSUpgrade then
     begin
     if not Response.WSUpgrade then
-      if Same_Text(Response.ValueCS['UPGRADE'],'WEBSOCKET') then
+      if Same_Text(Response.ValueCS['UPGRADE'],S_WEBSOCKET) then
         if PosEx('UPGRADE',Upper_Case(Response.ValueCS['CONNECTION']))>0 then
           Response.WSUpgrade:=True;
     if Response.WSUpgrade then
@@ -803,7 +804,7 @@ procedure TRtcSocketHttpServerProvider.WriteHeader(const Header_Text:RtcString; 
     if Request.WSUpgrade then
       begin
       if not Response.WSUpgrade then
-        if Same_Text(Response.ValueCS['UPGRADE'],'WEBSOCKET') then
+        if Same_Text(Response.ValueCS['UPGRADE'],S_WEBSOCKET) then
           if PosEx('UPGRADE',Upper_Case(Response.ValueCS['CONNECTION']))>0 then
             Response.WSUpgrade:=True;
       if Response.WSUpgrade then
@@ -824,7 +825,7 @@ procedure TRtcSocketHttpServerProvider.WriteHeader(const Header_Text:RtcString; 
     begin
     if Request.WSUpgrade then
       if not Response.WSUpgrade then
-        if Same_Text(Response.ValueCS['UPGRADE'],'WEBSOCKET') then
+        if Same_Text(Response.ValueCS['UPGRADE'],S_WEBSOCKET) then
           if PosEx('UPGRADE',Upper_Case(Response.ValueCS['CONNECTION']))>0 then
             Response.WSUpgrade:=True;
 

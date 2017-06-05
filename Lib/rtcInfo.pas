@@ -6866,6 +6866,8 @@ function Int2Str(i:integer):RtcString; overload;
 {$ENDIF}
 function Int2Str(i:int64):RtcString; overload;
 
+function Int2Hex(i,l:integer):RtcString; overload;
+
 function Int2WStr(i:int64):RtcWideString;
 
 function Str2Int(const s:RtcString):integer; overload;
@@ -9027,9 +9029,9 @@ procedure RtcStringCheck(const Source:RtcString);
     for i:=1 to len do
       if Ord(Source[i])>255 then
         if RTC_STRING_FIXMODE=rtcStr_NoFIX then
-          raise ERtcInfo.Create('RtcStringCheck: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Source[i])
+          raise ERtcInfo.Create('RtcStringCheck: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Char(Source[i]))
         else if RtcUnicodeToAnsiChar(Ord(Source[i]))=RTC_INVALID_CHAR then // invalid char
-          raise ERtcInfo.Create('RtcStringCheck: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Source[i]);
+          raise ERtcInfo.Create('RtcStringCheck: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Char(Source[i]));
     end;
   end;
 {$ENDIF}
@@ -9227,7 +9229,7 @@ procedure RtcStringToPBytes(Source:RtcString; var Dest; Len:Cardinal);
         begin
         Dst^:=RtcUnicodeToAnsiChar(Ord(Source[i]));
         if RTC_STRING_CHECK and (Dst^=RTC_INVALID_CHAR) then
-          raise ERtcInfo.Create('RtcStringToPBytes: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Source[i]);
+          raise ERtcInfo.Create('RtcStringToPBytes: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Char(Source[i]));
         end
       else
         Dst^:=Ord(Source[i]);
@@ -9239,7 +9241,7 @@ procedure RtcStringToPBytes(Source:RtcString; var Dest; Len:Cardinal);
     for i:=1 to len do
       begin
       if Ord(Source[i])>255 then
-        raise ERtcInfo.Create('RtcStringToPBytes: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Source[i]);
+        raise ERtcInfo.Create('RtcStringToPBytes: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Char(Source[i]));
       Dst^:=Ord(Source[i]);
       Inc(Dst);
       end;
@@ -9271,7 +9273,7 @@ procedure RtcStringToPBytes(Source:RtcString; var Dest; Loc, Len:Cardinal);
         begin
         Dst^:=RtcUnicodeToAnsiChar(Ord(Source[i]));
         if RTC_STRING_CHECK and (Dst^=RTC_INVALID_CHAR) then
-          raise ERtcInfo.Create('RtcStringToPBytes: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Source[i]);
+          raise ERtcInfo.Create('RtcStringToPBytes: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Char(Source[i]));
         end
       else
         Dst^:=Ord(Source[i]);
@@ -9283,7 +9285,7 @@ procedure RtcStringToPBytes(Source:RtcString; var Dest; Loc, Len:Cardinal);
     for i:=loc to loc+len-1 do
       begin
       if Ord(Source[i])>255 then
-        raise ERtcInfo.Create('RtcStringToPBytes: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Source[i]);
+        raise ERtcInfo.Create('RtcStringToPBytes: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Char(Source[i]));
       Dst^:=Ord(Source[i]);
       Inc(Dst);
       end;
@@ -9319,7 +9321,7 @@ procedure RtcStringToPBytesZero(Source:RtcString; var Dest; Loc, Len:Cardinal);
         begin
         Dst^:=RtcUnicodeToAnsiChar(Ord(Source[i]));
         if RTC_STRING_CHECK and (Dst^=RTC_INVALID_CHAR) then
-          raise ERtcInfo.Create('RtcStringToPBytesZero: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Source[i]);
+          raise ERtcInfo.Create('RtcStringToPBytesZero: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Char(Source[i]));
         end
       else
         Dst^:=Ord(Source[i]);
@@ -9333,7 +9335,7 @@ procedure RtcStringToPBytesZero(Source:RtcString; var Dest; Loc, Len:Cardinal);
       if Ord(Source[i])>255 then
         begin
         Dst^:=0; // close dest string
-        raise ERtcInfo.Create('RtcStringToPBytesZero: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Source[i]);
+        raise ERtcInfo.Create('RtcStringToPBytesZero: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Char(Source[i]));
         end;
       Dst^:=Ord(Source[i]);
       Inc(Dst);
@@ -9454,7 +9456,7 @@ function RtcStringToBytes(const Source:RtcString):RtcByteArray;
         begin
         Result[k] := RtcUnicodeToAnsiChar(Ord(Source[i]));
         if RTC_STRING_CHECK and (Result[k]=RTC_INVALID_CHAR) then
-          raise ERtcInfo.Create('RtcStringToBytes: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Source[i]);
+          raise ERtcInfo.Create('RtcStringToBytes: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Char(Source[i]));
         end
       else
         Result[k] := Byte(Source[i]);
@@ -9466,7 +9468,7 @@ function RtcStringToBytes(const Source:RtcString):RtcByteArray;
     for i:=1 to len do
       begin
       if Ord(Source[i])>255 then
-        raise ERtcInfo.Create('RtcStringToBytes: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Source[i]);
+        raise ERtcInfo.Create('RtcStringToBytes: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Char(Source[i]));
       Result[k] := Byte(Source[i]);
       Inc(k);
       end;
@@ -9503,7 +9505,7 @@ function RtcStringToBytes(const Source:RtcString; loc:Integer; len:Integer=-1):R
         begin
         Result[i]:=RtcUnicodeToAnsiChar(Ord(Source[k]));
         if RTC_STRING_CHECK and (Result[i]=RTC_INVALID_CHAR) then
-          raise ERtcInfo.Create('RtcStringToBytes: String contains Unicode character #'+IntToStr(Ord(Source[k]))+' = '+Source[k]);
+          raise ERtcInfo.Create('RtcStringToBytes: String contains Unicode character #'+IntToStr(Ord(Source[k]))+' = '+Char(Source[k]));
         end
       else
         Result[i] := Byte(Source[k]);
@@ -9515,7 +9517,7 @@ function RtcStringToBytes(const Source:RtcString; loc:Integer; len:Integer=-1):R
     for i:=0 to len-1 do
       begin
       if Ord(Source[k])>255 then
-        raise ERtcInfo.Create('RtcStringToBytes: String contains Unicode character #'+IntToStr(Ord(Source[k]))+' = '+Source[k]);
+        raise ERtcInfo.Create('RtcStringToBytes: String contains Unicode character #'+IntToStr(Ord(Source[k]))+' = '+Char(Source[k]));
       Result[i] := Byte(Source[k]);
       Inc(k);
       end;
@@ -9554,7 +9556,7 @@ function RtcStringToBytesZero(const Source:RtcString):RtcByteArray;
         begin
         Result[k]:=RtcUnicodeToAnsiChar(Ord(Source[i]));
         if RTC_STRING_CHECK and (Result[k]=RTC_INVALID_CHAR) then
-          raise ERtcInfo.Create('RtcStringToBytesZero: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Source[i]);
+          raise ERtcInfo.Create('RtcStringToBytesZero: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Char(Source[i]));
         end
       else
         Result[k] := Byte(Source[i]);
@@ -9566,7 +9568,7 @@ function RtcStringToBytesZero(const Source:RtcString):RtcByteArray;
     for i:=1 to len do
       begin
       if Ord(Source[i])>255 then
-        raise ERtcInfo.Create('RtcStringToBytesZero: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Source[i]);
+        raise ERtcInfo.Create('RtcStringToBytesZero: String contains Unicode character #'+IntToStr(Ord(Source[i]))+' = '+Char(Source[i]));
       Result[k] := Byte(Source[i]);
       Inc(k);
       end;
@@ -9604,7 +9606,7 @@ function RtcStringToBytesZero(const Source:RtcString; loc:Integer; len:Integer=-
         begin
         Result[i]:=RtcUnicodeToAnsiChar(Ord(Source[k]));
         if RTC_STRING_CHECK and (Result[i]=RTC_INVALID_CHAR) then
-          raise ERtcInfo.Create('RtcStringToBytesZero: String contains Unicode character #'+IntToStr(Ord(Source[k]))+' = '+Source[k]);
+          raise ERtcInfo.Create('RtcStringToBytesZero: String contains Unicode character #'+IntToStr(Ord(Source[k]))+' = '+Char(Source[k]));
         end
       else
         Result[i] := Byte(Source[k]);
@@ -9616,7 +9618,7 @@ function RtcStringToBytesZero(const Source:RtcString; loc:Integer; len:Integer=-
     for i:=0 to len-1 do
       begin
       if Ord(Source[k])>255 then
-        raise ERtcInfo.Create('RtcStringToBytesZero: String contains Unicode character #'+IntToStr(Ord(Source[k]))+' = '+Source[k]);
+        raise ERtcInfo.Create('RtcStringToBytesZero: String contains Unicode character #'+IntToStr(Ord(Source[k]))+' = '+Char(Source[k]));
       Result[i] := Byte(Source[k]);
       Inc(k);
       end;
@@ -10706,6 +10708,11 @@ function Int2Str(i:int64):RtcString;
 function Int2WStr(i:int64):RtcWideString;
   begin
   Result:=RtcWideString(IntToStr(i));
+  end;
+
+function Int2Hex(i,l:integer):RtcString;
+  begin
+  Result:=RtcString(IntToHex(i,l));
   end;
 
 function Curr2Str(v:Currency):RtcString;
@@ -15700,11 +15707,7 @@ function TRtcWideStringValue.GetBoolean: boolean;
   var
     v:RtcWideString;
   begin
-{$IFDEF UNICODE}
-  v:=UpperCase(FValue);
-{$ELSE}
-  v:=UpperCaseStr(FValue);
-{$ENDIF}
+  v:=Upper_WCase(FValue);
   if (v='') or (v='0') or
      (v='F') or (v='N') or
      (v='FALSE') or (v='NO') then
@@ -15963,11 +15966,7 @@ function TRtcTextValue.GetBoolean: boolean;
   var
     v:RtcWideString;
   begin
-{$IFDEF UNICODE}
-  v:=UpperCase(FValue);
-{$ELSE}
-  v:=UpperCaseStr(FValue);
-{$ENDIF}
+  v:=Upper_WCase(FValue);
   if (v='') or (v='0') or
      (v='F') or (v='N') or
      (v='FALSE') or (v='NO') then
@@ -19767,7 +19766,7 @@ class function TRtcValue.FromCode(const data: RtcString; var at:integer; const M
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcValue.FromCode('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcValue.FromCode('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -19801,7 +19800,7 @@ class function TRtcValue.FromJSON(const data:RtcWideString; var at: integer; con
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcValue.FromJSON('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcValue.FromJSON('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -19842,7 +19841,7 @@ class function TRtcValue.FromXMLrpc(const data: RtcString; var at: integer; cons
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcValue.FromXMLrpc('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcValue.FromXMLrpc('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -19931,7 +19930,7 @@ class function TRtcValue.FromJSONrpc(rVer:byte; const data:RtcWideString; var at
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcValue.FromJSONrpc('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcValue.FromJSONrpc('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -20168,7 +20167,7 @@ class function TRtcValueResult.FromJSONrpc(rVer:byte; const data:RtcWideString; 
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcValueResult.FromJSONrpc('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcValueResult.FromJSONrpc('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -22398,7 +22397,7 @@ procedure TRtcRecord.CopyFrom(pValue: TRtcValueObject);
               on E:Exception do
                 begin
                 if LOG_INFO_ERRORS then
-                  Log('TRtcRecord.CopyFrom ('+IntToStr(idx)+'/'+IntToStr(Count)+')',E,'INFO');
+                  Log('TRtcRecord.CopyFrom ('+Int2Str(idx)+'/'+Int2Str(Count)+')',E,'INFO');
                 raise;
                 end;
               end;
@@ -22462,7 +22461,7 @@ procedure TRtcRecord.from_Code(const s: RtcString; var at:integer; const MaxDept
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcRecord.from_Code('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcRecord.from_Code('+Int2Str(at)+')',E,'INFO');
       val.DestroyObjects;
       RtcFreeAndNil(val);
       raise;
@@ -22525,7 +22524,7 @@ class function TRtcRecord.FromCode(const data: RtcString; var at:integer; const 
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcRecord.FromCode('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcRecord.FromCode('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -22559,7 +22558,7 @@ class function TRtcRecord.FromJSON(const data:RtcWideString; var at: integer; co
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcRecord.FromJSON('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcRecord.FromJSON('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -22600,7 +22599,7 @@ class function TRtcRecord.FromXMLrpc(const data: RtcString; var at: integer; con
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcRecord.FromXMLrpc('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcRecord.FromXMLrpc('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -22649,7 +22648,7 @@ procedure TRtcRecord.from_JSON(const s:RtcWideString; var at: integer; const Max
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcRecord.from_JSON('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcRecord.from_JSON('+Int2Str(at)+')',E,'INFO');
       val.DestroyObjects;
       RtcFreeAndNil(val);
       raise;
@@ -22850,7 +22849,7 @@ procedure TRtcRecord.from_XMLrpc(const s: RtcString; var at: integer; const MaxD
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcRecord.from_XMLrpc('+IntToStr(at)+')',E,'INFO');
+          Log('TRtcRecord.from_XMLrpc('+Int2Str(at)+')',E,'INFO');
         val.DestroyObjects;
         RtcFreeAndNil(val);
         raise;
@@ -23543,7 +23542,7 @@ class function TRtcFunctionInfo.FromCode(const data: RtcString; var at:integer; 
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcFunctionInfo.FromCode('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcFunctionInfo.FromCode('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -23578,7 +23577,7 @@ class function TRtcFunctionInfo.FromCodeREST(Request:TRtcRequest; const SessIDFi
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcFunctionInfo.FromCode('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcFunctionInfo.FromCode('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -23767,7 +23766,7 @@ procedure TRtcFunctionInfo.from_JSON(const s:RtcWideString; var at: integer; con
           on E:Exception do
             begin
             if LOG_INFO_ERRORS then
-              Log('TRtcFunctionInfo.from_JSON('+IntToStr(at)+')',E,'INFO');
+              Log('TRtcFunctionInfo.from_JSON('+Int2Str(at)+')',E,'INFO');
             val.DestroyObjects;
             RtcFreeAndNil(val);
             raise;
@@ -23894,7 +23893,7 @@ procedure TRtcFunctionInfo.from_JSON(const s:RtcWideString; var at: integer; con
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.from_JSON('+IntToStr(at)+')',E,'INFO');
+            Log('TRtcFunctionInfo.from_JSON('+Int2Str(at)+')',E,'INFO');
           val.DestroyObjects;
           RtcFreeAndNil(val);
           raise;
@@ -23979,7 +23978,7 @@ class function TRtcFunctionInfo.FromJSONREST(Request:TRtcRequest; const SessIDFi
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcFunctionInfo.FromJSONREST('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcFunctionInfo.FromJSONREST('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -24000,7 +23999,7 @@ class function TRtcFunctionInfo.FromJSON(const data:RtcWideString; var at: integ
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcFunctionInfo.FromJSON('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcFunctionInfo.FromJSON('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -24233,7 +24232,7 @@ procedure TRtcFunctionInfo.from_XMLrpc(const s: RtcString; var at: integer; cons
               on E:Exception do
                 begin
                 if LOG_INFO_ERRORS then
-                  Log('TRtcFunctionInfo.from_XMLrpc /PARAMS ('+IntToStr(at)+')',E,'INFO');
+                  Log('TRtcFunctionInfo.from_XMLrpc /PARAMS ('+Int2Str(at)+')',E,'INFO');
                 FValues.DestroyObjects;
                 RtcFreeAndNil(FValues);
                 raise;
@@ -24310,7 +24309,7 @@ procedure TRtcFunctionInfo.from_XMLrpc(const s: RtcString; var at: integer; cons
               on E:Exception do
                 begin
                 if LOG_INFO_ERRORS then
-                  Log('TRtcFunctionInfo.from_XMLrpc /PARAMS 2 ('+IntToStr(at)+')',E,'INFO');
+                  Log('TRtcFunctionInfo.from_XMLrpc /PARAMS 2 ('+Int2Str(at)+')',E,'INFO');
                 FValues.DestroyObjects;
                 RtcFreeAndNil(FValues);
                 raise;
@@ -24590,7 +24589,7 @@ procedure TRtcFunctionInfo.from_XMLREST(const s: RtcString; var at: integer; con
               on E:Exception do
                 begin
                 if LOG_INFO_ERRORS then
-                  Log('TRtcFunctionInfo.from_XMLREST /PARAMS ('+IntToStr(at)+')',E,'INFO');
+                  Log('TRtcFunctionInfo.from_XMLREST /PARAMS ('+Int2Str(at)+')',E,'INFO');
                 FValues.DestroyObjects;
                 RtcFreeAndNil(FValues);
                 raise;
@@ -24667,7 +24666,7 @@ procedure TRtcFunctionInfo.from_XMLREST(const s: RtcString; var at: integer; con
               on E:Exception do
                 begin
                 if LOG_INFO_ERRORS then
-                  Log('TRtcFunctionInfo.from_XMLREST /PARAMS 2 ('+IntToStr(at)+')',E,'INFO');
+                  Log('TRtcFunctionInfo.from_XMLREST /PARAMS 2 ('+Int2Str(at)+')',E,'INFO');
                 FValues.DestroyObjects;
                 RtcFreeAndNil(FValues);
                 raise;
@@ -24821,7 +24820,7 @@ class function TRtcFunctionInfo.FromXMLrpc(const data: RtcString; var at: intege
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcFunctionInfo.FromXMLrpc('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcFunctionInfo.FromXMLrpc('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -24857,7 +24856,7 @@ class function TRtcFunctionInfo.FromXMLREST(Request:TRtcRequest; const SessIDFie
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcFunctionInfo.FromXMLREST('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcFunctionInfo.FromXMLREST('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -25362,7 +25361,7 @@ procedure TRtcFunctionInfo.SetParBoolean(index: integer; const Value: boolean);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.SetParBoolean('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcFunctionInfo.SetParBoolean('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -25390,7 +25389,7 @@ procedure TRtcFunctionInfo.SetParCurrency(index: integer; const Value: Currency)
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.SetParCurrency('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcFunctionInfo.SetParCurrency('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -25418,7 +25417,7 @@ procedure TRtcFunctionInfo.SetParDateTime(index: integer; const Value: TDateTime
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.SetParDateTime('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcFunctionInfo.SetParDateTime('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -25446,7 +25445,7 @@ procedure TRtcFunctionInfo.SetParException(index: integer; const Value:RtcWideSt
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.SetParException('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcFunctionInfo.SetParException('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -25474,7 +25473,7 @@ procedure TRtcFunctionInfo.SetParErrorCode(index: integer; const Value:rtcLargeI
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.SetParErrorCode('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcFunctionInfo.SetParErrorCode('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -25502,7 +25501,7 @@ procedure TRtcFunctionInfo.SetParErrorMessage(index: integer; const Value:RtcWid
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.SetParErrorMessage('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcFunctionInfo.SetParErrorMessage('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -25530,7 +25529,7 @@ procedure TRtcFunctionInfo.SetParErrorData(index: integer; const Value:TRtcValue
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.SetParErrorData('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcFunctionInfo.SetParErrorData('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -25558,7 +25557,7 @@ procedure TRtcFunctionInfo.SetParVarName(index: integer; const Value:RtcWideStri
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.SetParVarName('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcFunctionInfo.SetParVarName('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -25586,7 +25585,7 @@ procedure TRtcFunctionInfo.SetParInteger(index: integer; const Value: rtcInteger
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.SetParInteger('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcFunctionInfo.SetParInteger('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -25614,7 +25613,7 @@ procedure TRtcFunctionInfo.SetParCardinal(index: integer; const Value: rtcCardin
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.SetParCardinal('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcFunctionInfo.SetParCardinal('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -25642,7 +25641,7 @@ procedure TRtcFunctionInfo.SetParLargeInt(index: integer; const Value: rtcLargeI
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.SetParLargeInt('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcFunctionInfo.SetParLargeInt('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -25670,7 +25669,7 @@ procedure TRtcFunctionInfo.SetParOID(index: integer; const Value: TRtcObjectID);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.SetParOID('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcFunctionInfo.SetParOID('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -25698,7 +25697,7 @@ procedure TRtcFunctionInfo.SetParLinkedObject(index: integer; const Value: TObje
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.SetParLinkedObject('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcFunctionInfo.SetParLinkedObject('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -25726,7 +25725,7 @@ procedure TRtcFunctionInfo.SetParFloat(index: integer; const Value: rtcFloat);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.SetParFloat('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcFunctionInfo.SetParFloat('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -25754,7 +25753,7 @@ procedure TRtcFunctionInfo.SetParString(index: integer; const Value: RtcString);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.SetParString('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcFunctionInfo.SetParString('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -25782,7 +25781,7 @@ procedure TRtcFunctionInfo.SetParWideString(index: integer; const Value: RtcWide
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.SetParWideString('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcFunctionInfo.SetParWideString('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -25810,7 +25809,7 @@ procedure TRtcFunctionInfo.SetParText(index: integer; const Value:RtcWideString)
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.SetParText('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcFunctionInfo.SetParText('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -25838,7 +25837,7 @@ procedure TRtcFunctionInfo.SetParByteArray(index: integer; const Value: RtcByteA
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.SetParByteArray('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcFunctionInfo.SetParByteArray('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -25866,7 +25865,7 @@ procedure TRtcFunctionInfo.SetParByteStream(index: integer; const Value: TStream
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcFunctionInfo.SetParByteStream('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcFunctionInfo.SetParByteStream('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -25906,7 +25905,7 @@ procedure TRtcFunctionInfo.SetParVariant(index: integer; const Value: Variant);
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcFunctionInfo.SetParVariant('+IntToStr(index)+')',E,'INFO');
+        Log('TRtcFunctionInfo.SetParVariant('+Int2Str(index)+')',E,'INFO');
       gobj.Free;
       raise;
       end;
@@ -25928,7 +25927,7 @@ function TRtcFunctionInfo.MakeArray(index: integer): TRtcArray;
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcFunctionInfo.MakeArray('+IntToStr(index)+')',E,'INFO');
+        Log('TRtcFunctionInfo.MakeArray('+Int2Str(index)+')',E,'INFO');
       RtcFreeAndNil(Result);
       raise;
       end;
@@ -25945,7 +25944,7 @@ function TRtcFunctionInfo.MakeRecord(index: integer): TRtcRecord;
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcFunctionInfo.MakeRecord('+IntToStr(index)+')',E,'INFO');
+        Log('TRtcFunctionInfo.MakeRecord('+Int2Str(index)+')',E,'INFO');
       RtcFreeAndNil(Result);
       raise;
       end;
@@ -25962,7 +25961,7 @@ function TRtcFunctionInfo.MakeDataSet(index: integer): TRtcDataSet;
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcFunctionInfo.MakeDataSet('+IntToStr(index)+')',E,'INFO');
+        Log('TRtcFunctionInfo.MakeDataSet('+Int2Str(index)+')',E,'INFO');
       RtcFreeAndNil(Result);
       raise;
       end;
@@ -26001,7 +26000,7 @@ function TRtcFunctionInfo.MakeByteArray(index: integer; InitialSize:Integer=0): 
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcFunctionInfo.MakeByteArray('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcFunctionInfo.MakeByteArray('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -26026,7 +26025,7 @@ function TRtcFunctionInfo.MakeBoolean(index: integer): boolean;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcFunctionInfo.MakeBoolean('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcFunctionInfo.MakeBoolean('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -26051,7 +26050,7 @@ function TRtcFunctionInfo.MakeCurrency(index: integer): Currency;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcFunctionInfo.MakeCurrency('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcFunctionInfo.MakeCurrency('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -26076,7 +26075,7 @@ function TRtcFunctionInfo.MakeDateTime(index: integer): TDateTime;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcFunctionInfo.MakeDateTime('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcFunctionInfo.MakeDateTime('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -26101,7 +26100,7 @@ function TRtcFunctionInfo.MakeException(index: integer):RtcWideString;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcFunctionInfo.MakeException('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcFunctionInfo.MakeException('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -26126,7 +26125,7 @@ function TRtcFunctionInfo.MakeVariable(index: integer):RtcWideString;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcFunctionInfo.MakeVariable('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcFunctionInfo.MakeVariable('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -26151,7 +26150,7 @@ function TRtcFunctionInfo.MakeInteger(index: integer): rtcInteger;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcFunctionInfo.MakeInteger('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcFunctionInfo.MakeInteger('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -26176,7 +26175,7 @@ function TRtcFunctionInfo.MakeCardinal(index: integer): rtcCardinal;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcFunctionInfo.MakeCardinal('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcFunctionInfo.MakeCardinal('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -26201,7 +26200,7 @@ function TRtcFunctionInfo.MakeLargeInt(index: integer): rtcLargeInt;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcFunctionInfo.MakeLargeInt('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcFunctionInfo.MakeLargeInt('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -26226,7 +26225,7 @@ function TRtcFunctionInfo.MakeFloat(index: integer): rtcFloat;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcFunctionInfo.MakeFloat('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcFunctionInfo.MakeFloat('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -26251,7 +26250,7 @@ function TRtcFunctionInfo.MakeString(index: integer): RtcString;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcFunctionInfo.MakeString('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcFunctionInfo.MakeString('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -26276,7 +26275,7 @@ function TRtcFunctionInfo.MakeWideString(index: integer): RtcWideString;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcFunctionInfo.MakeWideString('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcFunctionInfo.MakeWideString('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -26301,7 +26300,7 @@ function TRtcFunctionInfo.MakeText(index: integer):RtcWideString;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcFunctionInfo.MakeText('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcFunctionInfo.MakeText('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -26326,7 +26325,7 @@ function TRtcFunctionInfo.MakeByteStream(index: integer): TStream;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcFunctionInfo.MakeByteStream('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcFunctionInfo.MakeByteStream('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -26380,7 +26379,7 @@ procedure TRtcFunctionInfo.SetParCode(index: integer; const Value: RtcString);
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcFunctionInfo.SetParCode('+IntToStr(index)+')',E,'INFO');
+        Log('TRtcFunctionInfo.SetParCode('+Int2Str(index)+')',E,'INFO');
       gobj.Free;
       raise;
       end;
@@ -26424,7 +26423,7 @@ procedure TRtcFunctionInfo.SetParJSON(index: integer; const Value:RtcWideString)
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcFunctionInfo.SetParJSON('+IntToStr(index)+')',E,'INFO');
+        Log('TRtcFunctionInfo.SetParJSON('+Int2Str(index)+')',E,'INFO');
       gobj.Free;
       raise;
       end;
@@ -26463,7 +26462,7 @@ procedure TRtcFunctionInfo.SetParXMLrpc(index: integer; const Value: RtcString);
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcFunctionInfo.SetParXMLrpc('+IntToStr(index)+')',E,'INFO');
+        Log('TRtcFunctionInfo.SetParXMLrpc('+Int2Str(index)+')',E,'INFO');
       gobj.Free;
       raise;
       end;
@@ -26960,7 +26959,7 @@ procedure TRtcAbsArray.SetBoolean(index: integer; const Value: boolean);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcAbsArray.SetBoolean('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcAbsArray.SetBoolean('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -26988,7 +26987,7 @@ procedure TRtcAbsArray.SetCurrency(index: integer; const Value: Currency);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcAbsArray.SetCurrency('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcAbsArray.SetCurrency('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -27016,7 +27015,7 @@ procedure TRtcAbsArray.SetDateTime(index: integer; const Value: TDateTime);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcAbsArray.SetDateTime('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcAbsArray.SetDateTime('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -27044,7 +27043,7 @@ procedure TRtcAbsArray.SetException(index: integer; const Value:RtcWideString);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcAbsArray.SetException('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcAbsArray.SetException('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -27072,7 +27071,7 @@ procedure TRtcAbsArray.SetErrorCode(index: integer; const Value:rtcLargeInt);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcAbsArray.SetErrorCode('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcAbsArray.SetErrorCode('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -27100,7 +27099,7 @@ procedure TRtcAbsArray.SetErrorMessage(index: integer; const Value:RtcWideString
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcAbsArray.SetErrorMessage('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcAbsArray.SetErrorMessage('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -27128,7 +27127,7 @@ procedure TRtcAbsArray.SetErrorData(index: integer; const Value:TRtcValue);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcAbsArray.SetErrorData('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcAbsArray.SetErrorData('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -27156,7 +27155,7 @@ procedure TRtcAbsArray.SetVarName(index: integer; const Value:RtcWideString);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcAbsArray.SetVarName('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcAbsArray.SetVarName('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -27184,7 +27183,7 @@ procedure TRtcAbsArray.SetInteger(index: integer; const Value: rtcInteger);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcAbsArray.SetInteger('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcAbsArray.SetInteger('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -27212,7 +27211,7 @@ procedure TRtcAbsArray.SetCardinal(index: integer; const Value: rtcCardinal);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcAbsArray.SetCardinal('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcAbsArray.SetCardinal('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -27240,7 +27239,7 @@ procedure TRtcAbsArray.SetLargeInt(index: integer; const Value: rtcLargeInt);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcAbsArray.SetLargeInt('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcAbsArray.SetLargeInt('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -27268,7 +27267,7 @@ procedure TRtcAbsArray.SetOID(index: integer; const Value: TRtcObjectID);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcAbsArray.SetOID('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcAbsArray.SetOID('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -27296,7 +27295,7 @@ procedure TRtcAbsArray.SetLinkedObject(index: integer; const Value: TObject);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcAbsArray.SetLinkedObject('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcAbsArray.SetLinkedObject('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -27324,7 +27323,7 @@ procedure TRtcAbsArray.SetFloat(index: integer; const Value: rtcFloat);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcAbsArray.SetFloat('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcAbsArray.SetFloat('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -27352,7 +27351,7 @@ procedure TRtcAbsArray.SetString(index: integer; const Value: RtcString);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcAbsArray.SetString('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcAbsArray.SetString('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -27380,7 +27379,7 @@ procedure TRtcAbsArray.SetWideString(index: integer; const Value: RtcWideString)
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcAbsArray.SetWideString('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcAbsArray.SetWideString('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -27408,7 +27407,7 @@ procedure TRtcAbsArray.SetText(index: integer; const Value:RtcWideString);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcAbsArray.SetText('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcAbsArray.SetText('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -27436,7 +27435,7 @@ procedure TRtcAbsArray.SetByteArray(index: integer; const Value: RtcByteArray);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcAbsArray.SetByteArray('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcAbsArray.SetByteArray('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -27464,7 +27463,7 @@ procedure TRtcAbsArray.SetByteStream(index: integer; const Value: TStream);
         on E:Exception do
           begin
           if LOG_INFO_ERRORS then
-            Log('TRtcAbsArray.SetByteStream('+IntToStr(index)+')',E,'INFO');
+            Log('TRtcAbsArray.SetByteStream('+Int2Str(index)+')',E,'INFO');
           RtcFreeAndNil(gobj);
           raise;
           end;
@@ -27504,7 +27503,7 @@ procedure TRtcAbsArray.SetVariant(index: integer; const Value: Variant);
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcAbsArray.SetVariant('+IntToStr(index)+')',E,'INFO');
+        Log('TRtcAbsArray.SetVariant('+Int2Str(index)+')',E,'INFO');
       gobj.Free;
       raise;
       end;
@@ -27526,7 +27525,7 @@ function TRtcAbsArray.NewArray(index: integer): TRtcArray;
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcAbsArray.NewArray('+IntToStr(index)+')',E,'INFO');
+        Log('TRtcAbsArray.NewArray('+Int2Str(index)+')',E,'INFO');
       RtcFreeAndNil(Result);
       raise;
       end;
@@ -27543,7 +27542,7 @@ function TRtcAbsArray.NewRecord(index: integer): TRtcRecord;
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcAbsArray.NewRecord('+IntToStr(index)+')',E,'INFO');
+        Log('TRtcAbsArray.NewRecord('+Int2Str(index)+')',E,'INFO');
       RtcFreeAndNil(Result);
       raise;
       end;
@@ -27560,7 +27559,7 @@ function TRtcAbsArray.NewDataSet(index: integer): TRtcDataSet;
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcAbsArray.NewDataSet('+IntToStr(index)+')',E,'INFO');
+        Log('TRtcAbsArray.NewDataSet('+Int2Str(index)+')',E,'INFO');
       RtcFreeAndNil(Result);
       raise;
       end;
@@ -27599,7 +27598,7 @@ function TRtcAbsArray.NewByteArray(index: integer; InitialSize:Integer=0): RtcBy
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcAbsArray.NewByteArray('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcAbsArray.NewByteArray('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -27624,7 +27623,7 @@ function TRtcAbsArray.NewBoolean(index: integer): boolean;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcAbsArray.NewBoolean('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcAbsArray.NewBoolean('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -27649,7 +27648,7 @@ function TRtcAbsArray.NewCurrency(index: integer): Currency;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcAbsArray.NewCurrency('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcAbsArray.NewCurrency('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -27674,7 +27673,7 @@ function TRtcAbsArray.NewDateTime(index: integer): TDateTime;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcAbsArray.NewDateTime('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcAbsArray.NewDateTime('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -27699,7 +27698,7 @@ function TRtcAbsArray.NewException(index: integer):RtcWideString;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcAbsArray.NewException('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcAbsArray.NewException('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -27724,7 +27723,7 @@ function TRtcAbsArray.NewVariable(index: integer):RtcWideString;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcAbsArray.NewVariable('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcAbsArray.NewVariable('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -27749,7 +27748,7 @@ function TRtcAbsArray.NewInteger(index: integer): rtcInteger;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcAbsArray.NewInteger('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcAbsArray.NewInteger('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -27774,7 +27773,7 @@ function TRtcAbsArray.NewCardinal(index: integer): rtcCardinal;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcAbsArray.NewCardinal('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcAbsArray.NewCardinal('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -27799,7 +27798,7 @@ function TRtcAbsArray.NewLargeInt(index: integer): rtcLargeInt;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcAbsArray.NewLargeInt('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcAbsArray.NewLargeInt('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -27824,7 +27823,7 @@ function TRtcAbsArray.NewFloat(index: integer): rtcFloat;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcAbsArray.NewFloat('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcAbsArray.NewFloat('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -27849,7 +27848,7 @@ function TRtcAbsArray.NewString(index: integer): RtcString;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcAbsArray.NewString('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcAbsArray.NewString('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -27874,7 +27873,7 @@ function TRtcAbsArray.NewWideString(index: integer): RtcWideString;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcAbsArray.NewWideString('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcAbsArray.NewWideString('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -27899,7 +27898,7 @@ function TRtcAbsArray.NewText(index: integer):RtcWideString;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcAbsArray.NewText('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcAbsArray.NewText('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -27924,7 +27923,7 @@ function TRtcAbsArray.NewByteStream(index: integer): TStream;
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcAbsArray.NewByteStream('+IntToStr(index)+')',E,'INFO');
+          Log('TRtcAbsArray.NewByteStream('+Int2Str(index)+')',E,'INFO');
         RtcFreeAndNil(gobj);
         raise;
         end;
@@ -27978,7 +27977,7 @@ procedure TRtcAbsArray.SetCode(index: integer; const Value: RtcString);
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcAbsArray.SetCode('+IntToStr(index)+')',E,'INFO');
+        Log('TRtcAbsArray.SetCode('+Int2Str(index)+')',E,'INFO');
       gobj.Free;
       raise;
       end;
@@ -28022,7 +28021,7 @@ procedure TRtcAbsArray.SetJSON(index: integer; const Value:RtcWideString);
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcAbsArray.SetJSON('+IntToStr(index)+')',E,'INFO');
+        Log('TRtcAbsArray.SetJSON('+Int2Str(index)+')',E,'INFO');
       gobj.Free;
       raise;
       end;
@@ -28061,7 +28060,7 @@ procedure TRtcAbsArray.SetXMLrpc(index: integer; const Value: RtcString);
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcAbsArray.SetXMLrpc('+IntToStr(index)+')',E,'INFO');
+        Log('TRtcAbsArray.SetXMLrpc('+Int2Str(index)+')',E,'INFO');
       gobj.Free;
       raise;
       end;
@@ -28313,7 +28312,7 @@ procedure TRtcArray.from_Code(const s: RtcString; var at:integer; const MaxDepth
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcArray.from_Code('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcArray.from_Code('+Int2Str(at)+')',E,'INFO');
       for idx:=0 to val.Count-1 do
         begin
         gobj:=TRtcValueObject(val.Items[idx]);
@@ -28369,7 +28368,7 @@ class function TRtcArray.FromCode(const data: RtcString; var at:integer; const M
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcArray.FromCode('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcArray.FromCode('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -28403,7 +28402,7 @@ class function TRtcArray.FromJSON(const data:RtcWideString; var at: integer; con
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcArray.FromJSON('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcArray.FromJSON('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -28444,7 +28443,7 @@ class function TRtcArray.FromXMLrpc(const data: RtcString; var at: integer; cons
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcArray.FromXMLrpc('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcArray.FromXMLrpc('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -28508,7 +28507,7 @@ procedure TRtcArray.from_JSON(const s:RtcWideString; var at: integer; const MaxD
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcArray.from_JSON('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcArray.from_JSON('+Int2Str(at)+')',E,'INFO');
       for idx:=0 to val.Count-1 do
         begin
         xval:=TRtcValueObject(val.Items[idx]);
@@ -28591,7 +28590,7 @@ procedure TRtcArray.from_XMLrpc(const s: RtcString; var at: integer; const MaxDe
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcArray.from_XMLrpc('+IntToStr(at)+')',E,'INFO');
+          Log('TRtcArray.from_XMLrpc('+Int2Str(at)+')',E,'INFO');
         for idx:=0 to val.Count-1 do
           begin
           xval:=TRtcValueObject(val.Items[idx]);
@@ -29384,7 +29383,7 @@ procedure TRtcDataSet.from_Code(const s: RtcString; var at:integer; const MaxDep
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcDataSet.from_Code('+IntToStr(at)+')',E,'INFO');
+          Log('TRtcDataSet.from_Code('+Int2Str(at)+')',E,'INFO');
         for idx:=0 to FData.Count-1 do
           begin
           gobj:=TRtcValueObject(FData.Items[idx]);
@@ -29398,7 +29397,7 @@ procedure TRtcDataSet.from_Code(const s: RtcString; var at:integer; const MaxDep
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcDataSet.from_Code 2('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcDataSet.from_Code 2('+Int2Str(at)+')',E,'INFO');
       FNames.DestroyObjects;
       RtcFreeAndNil(FNames);
       raise;
@@ -29451,7 +29450,7 @@ class function TRtcDataSet.FromCode(const data: RtcString; var at:integer; const
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcDataSet.FromCode('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcDataSet.FromCode('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -29485,7 +29484,7 @@ class function TRtcDataSet.FromJSON(const data:RtcWideString; var at: integer; c
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcDataSet.FromJSON('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcDataSet.FromJSON('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -29526,7 +29525,7 @@ class function TRtcDataSet.FromXMLrpc(const data: RtcString; var at: integer; co
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcDataSet.FromXMLrpc('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcDataSet.FromXMLrpc('+Int2Str(at)+')',E,'INFO');
       at:=oldat;
       RtcFreeAndNil(Result);
       raise;
@@ -29692,7 +29691,7 @@ procedure TRtcDataSet.from_JSON(const s:RtcWideString; var at: integer; const Ma
     on E:Exception do
       begin
       if LOG_INFO_ERRORS then
-        Log('TRtcDataSet.from_JSON('+IntToStr(at)+')',E,'INFO');
+        Log('TRtcDataSet.from_JSON('+Int2Str(at)+')',E,'INFO');
       if assigned(FData) then
         begin
         for idx:=0 to FData.Count-1 do
@@ -29998,7 +29997,7 @@ procedure TRtcDataSet.from_XMLrpc(const s: RtcString; var at: integer; const Max
       on E:Exception do
         begin
         if LOG_INFO_ERRORS then
-          Log('TRtcDataSet.from_XMLrpc('+IntToStr(at)+')',E,'INFO');
+          Log('TRtcDataSet.from_XMLrpc('+Int2Str(at)+')',E,'INFO');
         if assigned(FData) then
           begin
           for idx:=0 to FData.Count-1 do
@@ -30513,11 +30512,7 @@ procedure TRtcInfo.Clear;
 function TRtcInfo.Get_Object(const index:RtcWideString): TObject;
   begin
   if assigned(ObjList) then
-  {$IFDEF UNICODE}
-    Result:=ObjList.search(UpperCase(index))
-  {$ELSE}
-    Result:=ObjList.search(UpperCaseStr(index))
-  {$ENDIF}
+    Result:=ObjList.search(Upper_WCase(index))
   else
     Result:=nil;
   end;
@@ -30530,11 +30525,7 @@ procedure TRtcInfo.Set_Object(const index:RtcWideString; const pObj: TObject);
   if not assigned(ObjList) then
     ObjList:=tStringObjList.Create(8);
 
-{$IFDEF UNICODE}
-  uindex:=UpperCase(index);
-{$ELSE}
-  uindex:=UpperCaseStr(index);
-{$ENDIF}
+  uindex:=Upper_WCase(index);
   ob:=ObjList.search(uindex);
   if ob<>nil then
     begin
@@ -30555,11 +30546,7 @@ procedure TRtcInfo.Set_Object(const index:RtcWideString; const pObj: TObject);
 function TRtcInfo.Get_Pointer(const index:RtcWideString): TObject;
   begin
   if assigned(PtrList) then
-  {$IFDEF UNICODE}
-    Result:=PtrList.search(UpperCase(index))
-  {$ELSE}
-    Result:=PtrList.search(UpperCaseStr(index))
-  {$ENDIF}
+    Result:=PtrList.search(Upper_WCase(index))
   else
     Result:=nil;
   end;
@@ -30572,11 +30559,7 @@ procedure TRtcInfo.Set_Pointer(const index:RtcWideString; const pObj: TObject);
   if not assigned(PtrList) then
     PtrList:=tStringObjList.Create(8);
 
-{$IFDEF UNICODE}
-  uindex:=UpperCase(index);
-{$ELSE}
-  uindex:=UpperCaseStr(index);
-{$ENDIF}
+  uindex:=Upper_WCase(index);
   ob:=PtrList.search(uindex);
   if ob<>nil then
     begin
@@ -32986,11 +32969,7 @@ destructor TRtcRequestFilePath.Destroy;
 
 function TRtcRequestFilePath.Equal(index: integer; const pValue: RtcString): boolean;
   begin
-  {$IFDEF UNICODE}
-    Result:=Same_Text(GetValue(index),pValue);
-  {$ELSE}
-    Result:=SameText(GetValue(index),pValue);
-  {$ENDIF}
+  Result:=Same_Text(GetValue(index),pValue);
   end;
 
 function TRtcRequestFilePath.GetCount: integer;

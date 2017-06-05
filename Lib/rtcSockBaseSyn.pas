@@ -1216,7 +1216,7 @@ function TRtcSockSynThread.RunJob: boolean;
           on E:Exception do
             begin
             if LOG_AV_ERRORS then
-              Log('TRtcSockSynThread.RunJob Sock.Exec_Message('+IntToStr(TBaseSockMessage(Job).id)+')',E,'ERROR');
+              Log('TRtcSockSynThread.RunJob Sock.Exec_Message('+RtcString(IntToStr(TBaseSockMessage(Job).id))+')',E,'ERROR');
             Result:=True;
             end;
           end;
@@ -1231,7 +1231,7 @@ function TRtcSockSynThread.RunJob: boolean;
         on E:Exception do
           begin
           if LOG_AV_ERRORS then
-            Log('TRtcSockSynThread.RunJob('+Job.ClassName+')',E,'ERROR');
+            Log('TRtcSockSynThread.RunJob('+RtcString(Job.ClassName)+')',E,'ERROR');
           Result:=True;
           end;
         end;

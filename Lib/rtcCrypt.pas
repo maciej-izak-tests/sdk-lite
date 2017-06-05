@@ -235,7 +235,7 @@ procedure TRtcCrypt.Crypt(var s: RtcString);
           begin
           c2:=RtcUnicodeToAnsiChar(Word(s[a]));
           if RTC_STRING_CHECK and (c2=RTC_INVALID_CHAR) then
-            raise ERtcInfo.Create('TRtcCrypt.Crypt: Source contains Unicode character #'+IntToStr(Ord(s[a]))+' = '+s[a]);
+            raise ERtcInfo.Create('TRtcCrypt.Crypt: Source contains Unicode character #'+IntToStr(Ord(s[a]))+' = '+Char(s[a]));
           end;
         c:=c2 xor CCode; // Crypt this character
 
@@ -343,7 +343,7 @@ procedure TRtcCrypt.DeCrypt(var s: RtcString);
           begin
           c:=RtcUnicodeToAnsiChar(Word(s[a]));
           if RTC_STRING_CHECK and (c=RTC_INVALID_CHAR) then
-            raise ERtcInfo.Create('TRtcCrypt.DeCrypt: Source contains Unicode character #'+IntToStr(Ord(s[a]))+' = '+s[a]);
+            raise ERtcInfo.Create('TRtcCrypt.DeCrypt: Source contains Unicode character #'+IntToStr(Ord(s[a]))+' = '+Char(s[a]));
           end;
         
         c:=c xor CCode; // Crypt this character

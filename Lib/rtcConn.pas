@@ -7244,7 +7244,7 @@ function RtcWebSockHead(var Head:RtcWSHeader):RtcByteArray; overload;
     end;
   end;
 
-function RtcWebSockHeadToString(const Head:RtcWSHeader):String; overload;
+function RtcWebSockHeadToString(const Head:RtcWSHeader):RtcString; overload;
   begin
   case Head.Opcode of
     wf_Cont:   Result:='CNT';
@@ -7254,27 +7254,27 @@ function RtcWebSockHeadToString(const Head:RtcWSHeader):String; overload;
     wf_Ping:   Result:='PIN';
     wf_Pong:   Result:='PON';
     else       if Head.Opcode<=9 then
-                  Result:='#0'+IntToStr(Head.Opcode)
+                  Result:='#0'+Int2Str(Head.Opcode)
                else
-                  Result:='#'+IntToStr(Head.Opcode);
+                  Result:='#'+Int2Str(Head.Opcode);
     end;
   if Head.Final=TRUE  then Result:=Result+',FIN';
   if Head.RSV1=1 then Result:=Result+',rsv1';
   if Head.RSV2=1 then Result:=Result+',rsv2';
   if Head.RSV3=1 then Result:=Result+',rsv3';
   if Head.PayloadLength>=0 then
-    Result:=Result+',len='+IntToStr(Head.PayloadLength);
+    Result:=Result+',len='+Int2Str(Head.PayloadLength);
   if Head.PayloadInOut>0 then
-    Result:=Result+',read='+IntToStr(Head.PayloadInOut);
+    Result:=Result+',read='+Int2Str(Head.PayloadInOut);
   if Head.Masked=TRUE then
     Result:=Result+',mask$'+
-      IntToHex(Head.MaskingKey[0],2)+
-      IntToHex(Head.MaskingKey[1],2)+
-      IntToHex(Head.MaskingKey[2],2)+
-      IntToHex(Head.MaskingKey[3],2);
+      Int2Hex(Head.MaskingKey[0],2)+
+      Int2Hex(Head.MaskingKey[1],2)+
+      Int2Hex(Head.MaskingKey[2],2)+
+      Int2Hex(Head.MaskingKey[3],2);
   end;
 
-function RtcWebSockHeadToString(const Source:RtcByteArray):String; overload;
+function RtcWebSockHeadToString(const Source:RtcByteArray):RtcString; overload;
   begin
   Result:=RtcWebSockHeadToString(RtcWebSockHead(Source));
   end;

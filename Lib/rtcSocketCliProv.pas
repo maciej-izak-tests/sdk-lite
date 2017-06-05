@@ -1279,10 +1279,10 @@ function TRtcSocketClientThread.RunJob:boolean;
           Result:=True;
           if LOG_AV_ERRORS then
             try
-              Log('CLI:TRtcSocketClientThread.RunJob "DoMessage('+IntToStr(TRtcSockMessage(Job).Msg)+')"',E,'ERROR');
+              Log('CLI:TRtcSocketClientThread.RunJob "DoMessage('+Int2Str(TRtcSockMessage(Job).Msg)+')"',E,'ERROR');
             except
               on E2:Exception do
-                Log('CLI:TRtcSocketClientThread.RunJob "DoMessage('+E2.ClassName+':'+E2.Message+')"',E,'ERROR');
+                Log('CLI:TRtcSocketClientThread.RunJob "DoMessage('+RtcString(E2.ClassName)+':'+RtcString(E2.Message)+')"',E,'ERROR');
               end;
           end;
         end;
@@ -1305,10 +1305,10 @@ function TRtcSocketClientThread.RunJob:boolean;
           Result:=True;
           if LOG_AV_ERRORS then
             try
-              Log('CLI:TRtcSocketClientThread.RunJob "TRtcSocketMesDataJob('+IntToStr(TRtcSocketMesDataJob(Job).Msg)+')"',E,'ERROR');
+              Log('CLI:TRtcSocketClientThread.RunJob "TRtcSocketMesDataJob('+Int2Str(TRtcSocketMesDataJob(Job).Msg)+')"',E,'ERROR');
             except
               on E2:Exception do
-                Log('CLI:TRtcSocketClientThread.RunJob "TRtcSocketMesDataJob('+E2.ClassName+':'+E2.Message+')"',E,'ERROR');
+                Log('CLI:TRtcSocketClientThread.RunJob "TRtcSocketMesDataJob('+RtcString(E2.ClassName)+':'+RtcString(E2.Message)+')"',E,'ERROR');
               end;
           end;
         end;
@@ -1394,10 +1394,10 @@ function TRtcSocketClientThread.RunJob:boolean;
           Result:=True;
           if LOG_AV_ERRORS then
             try
-              Log('CLI:TRtcSocketClientThread.RunJob (else: "'+Job.ClassName+'")',E,'ERROR');
+              Log('CLI:TRtcSocketClientThread.RunJob (else: "'+RtcString(Job.ClassName)+'")',E,'ERROR');
             except
               on E2:Exception do
-                Log('CLI:TRtcSocketClientThread.RunJob (else: *ClassError* "'+E2.ClassName+':'+E2.Message+'")',E,'ERROR');
+                Log('CLI:TRtcSocketClientThread.RunJob (else: *ClassError* "'+RtcString(E2.ClassName)+':'+RtcString(E2.Message)+'")',E,'ERROR');
               end;
           end;
         end;

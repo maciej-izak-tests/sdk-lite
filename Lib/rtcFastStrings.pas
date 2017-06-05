@@ -343,17 +343,17 @@ var
 // @exclude
 function Upper_Case(const s:RtcString):RtcString;
 // @exclude
-function Same_Text(const s1,s2:RtcString):boolean; overload;
-{$IFDEF RTC_BYTESTRING}
+function Upper_WCase(const s:RtcWideString):RtcWideString;
+
 // @exclude
-function Same_Text(const s1,s2:RtcWideString):boolean; overload;
-{$ENDIF}
+function Same_Text(const s1,s2:RtcString):boolean;
+// @exclude
+function Same_WText(const s1,s2:RtcWideString):boolean;
 
 // @exclude
 function Up_Case(const c:RtcChar):RtcChar;
-
 // @exclude
-function UpperCaseStr(const s:RtcWideString):RtcWideString;
+function Up_WCase(const c:RtcWideChar):RtcWideChar;
 
 { Set the code-page for implicit Unicode <-> ANSI conversions done by RTC.
   This will assign the "RtcUnicodeToAnsiChar" and "RtcAnsiToUnicodeChar" functions
@@ -5233,6 +5233,14 @@ function Up_Case(const c:RtcChar):RtcChar;
     Result:=c;
   end;
 
+function Up_WCase(const c:RtcWideChar):RtcWideChar;
+  begin
+  if (c>='a') and (c<='z') then
+    Result:=RtcWideChar(Ord(c) - 32)
+  else
+    Result:=c;
+  end;
+
 function Same_Text(const s1,s2:RtcString):boolean;
   var
     i:integer;
@@ -5270,8 +5278,7 @@ function Same_Text(const s1,s2:RtcString):boolean;
     Result:=True;
   end;
 
-{$IFDEF RTC_BYTESTRING}
-function Same_Text(const s1,s2:RtcWideString):boolean;
+function Same_WText(const s1,s2:RtcWideString):boolean;
   var
     i:integer;
     c,d:^RtcBinWideChar;
@@ -5307,9 +5314,8 @@ function Same_Text(const s1,s2:RtcWideString):boolean;
   else
     Result:=True;
   end;
-{$ENDIF}
 
-function UpperCaseStr(const s:RtcWideString):RtcWideString;
+function Upper_WCase(const s:RtcWideString):RtcWideString;
   var
     i:integer;
     c,d:^RtcBinWideChar;
@@ -5348,7 +5354,7 @@ procedure RtcStringToByteArray(const Source:RtcString; var Dest:RtcByteArray; So
         begin
         Dest[i] := RtcUnicodeToAnsiChar(Ord(Source[k]));
         if RTC_STRING_CHECK and (Dest[i]=RTC_INVALID_CHAR) then
-          raise Exception.Create('RtcStringToByteArray: String contains Unicode character #'+IntToStr(Ord(Source[k]))+' = '+Source[k]);
+          raise Exception.Create('RtcStringToByteArray: String contains Unicode character #'+IntToStr(Ord(Source[k]))+' = '+Char(Source[k]));
         end
       else
         Dest[i] := Byte(Source[k]);
@@ -5360,7 +5366,7 @@ procedure RtcStringToByteArray(const Source:RtcString; var Dest:RtcByteArray; So
     for i:=DestLoc to DestLoc+len-1 do
       begin
       if Ord(Source[k])>255 then
-        raise Exception.Create('RtcStringToByteArray: String contains Unicode character #'+IntToStr(Ord(Source[k]))+' = '+Source[k])
+        raise Exception.Create('RtcStringToByteArray: String contains Unicode character #'+IntToStr(Ord(Source[k]))+' = '+Char(Source[k]))
       else
         Dest[i] := Byte(Source[k]);
       Inc(k);
@@ -6576,7 +6582,7 @@ function tRtcFastStringObjList.Add(const Name: RtcWideString; _Value:TObject=nil
   if FPackCnt>=RTC_STROBJ_PACK then
     FastStringListGrow;
 
-  Tree.insert(UpperCaseStr(Name), FCnt);
+  Tree.insert(Upper_WCase(Name), FCnt);
   with FPack[FPackCnt] do
     begin
     str:=Name;
@@ -6592,12 +6598,12 @@ function tRtcFastStringObjList.Add(const Name: RtcWideString; _Value:TObject=nil
 
 function tRtcFastStringObjList.Find(const Name: RtcWideString): integer;
   begin
-  Result:=Tree.search(UpperCaseStr(Name));
+  Result:=Tree.search(Upper_WCase(Name));
   end;
 
 function tRtcFastStringObjList.IndexOf(const Name: RtcWideString): integer;
   begin
-  Result:=Tree.search(UpperCaseStr(Name));
+  Result:=Tree.search(Upper_WCase(Name));
   end;
 
 function tRtcFastStringObjList.AddCS(const Name: RtcWideString; _Value:TObject=nil): integer;
@@ -6662,18 +6668,18 @@ procedure tRtcFastStringObjList.SetName(const index: integer; const _Value: RtcW
     begin
     with FData[index shr RTC_STROBJ_SHIFT]^[index and RTC_STROBJ_AND] do
       begin
-      Tree.remove(UpperCaseStr(str));
+      Tree.remove(Upper_WCase(str));
       str:=_Value;
-      Tree.insert(UpperCaseStr(_Value), index);
+      Tree.insert(Upper_WCase(_Value), index);
       end;
     end
   else
     begin
     with FPack^[index and RTC_STROBJ_AND] do
       begin
-      Tree.remove(UpperCaseStr(str));
+      Tree.remove(Upper_WCase(str));
       str:=_Value;
-      Tree.insert(UpperCaseStr(_Value), index);
+      Tree.insert(Upper_WCase(_Value), index);
       end;
     end;
   if assigned(FOnChange) then FOnChange(self);

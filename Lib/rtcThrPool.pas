@@ -2226,7 +2226,7 @@ procedure TRtcThread.KillJob;
       on E:Exception do
         if LOG_AV_ERRORS then
           try
-            Log('TRtcThread.KillJob ('+Job.ClassName+')',E,'ERROR');
+            Log('TRtcThread.KillJob ('+RtcString(Job.ClassName)+')',E,'ERROR');
           except
             Log('TRtcThread.KillJob (Unknown_class)',E,'ERROR');
             end;

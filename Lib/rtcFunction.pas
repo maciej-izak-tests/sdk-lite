@@ -876,7 +876,7 @@ function TRtcFunction.Call_Execute(const CmdInfo: TRtcCommandInfo;
                                    const Param: TRtcFunctionInfo;
                                    const Res: TRtcValue):boolean;
   begin
-  if Same_Text(Param.FunctionName,FunctionName) then
+  if Same_WText(Param.FunctionName,FunctionName) then
     begin
     Result:=True;
     if assigned(FOnExecute) then
@@ -890,7 +890,7 @@ function TRtcFunction.Call_Execute(const CmdInfo: TRtcCommandInfo;
 
 function TRtcFunction.Function_Exists(const Function_Name: RtcWideString): boolean;
   begin
-  Result:= Same_Text(FunctionName, Function_Name);
+  Result:= Same_WText(FunctionName, Function_Name);
   end;
 
 function TRtcFunction.GetFuncName: RtcWideString;

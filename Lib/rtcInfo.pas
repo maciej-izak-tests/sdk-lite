@@ -22488,7 +22488,7 @@ procedure TRtcRecord.to_Code(const Result:TRtcHugeString);
       begin
       try
         {$IFDEF RtcUpperCaseFieldNames}
-          Result.Add(code_toNameString(UpperCaseStr(GetFieldName(idx))));
+          Result.Add(code_toNameString(Upper_WCase(GetFieldName(idx))));
         {$ELSE}
           Result.Add(code_toNameString(GetFieldName(idx)));
         {$ENDIF}
@@ -29285,7 +29285,7 @@ procedure TRtcDataSet.to_Code(const Result:TRtcHugeString);
       try
         fname:=GetFieldName(idx);
         {$IFDEF RtcUpperCaseFieldNames}
-          Result.Add(code_toNameString(UpperCaseStr(fname)));
+          Result.Add(code_toNameString(Upper_WCase(fname)));
         {$ELSE}
           Result.Add(code_toNameString(fname));
         {$ENDIF}
@@ -30578,11 +30578,7 @@ procedure TRtcInfo.Set_Pointer(const index:RtcWideString; const pObj: TObject);
 function TRtcInfo.Get_RtcObject(const index:RtcWideString): TObject;
   begin
   if assigned(RtcObjList) then
-  {$IFDEF UNICODE}
-    Result:=RtcObjList.search(UpperCase(index))
-  {$ELSE}
-    Result:=RtcObjList.search(UpperCaseStr(index))
-  {$ENDIF}
+    Result:=RtcObjList.search(Upper_WCase(index))
   else
     Result:=nil;
   end;
@@ -30595,11 +30591,7 @@ procedure TRtcInfo.Set_RtcObject(const index:RtcWideString; const pObj: TObject)
   begin
   if not assigned(RtcObjList) then
     RtcObjList:=tStringObjList.Create(8);
-{$IFDEF UNICODE}
-  uindex:=UpperCase(index);
-{$ELSE}
-  uindex:=UpperCaseStr(index);
-{$ENDIF}
+  uindex:=Upper_WCase(index);
   ob:=RtcObjList.search(uindex);
   if ob<>nil then
     begin

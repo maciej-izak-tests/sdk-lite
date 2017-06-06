@@ -626,14 +626,21 @@ function rtcKeyMD5Code8BitLockMatch(const Key,MD5Code8BitLock:RtcString):boolean
 type
   TSHA1Word = Cardinal;
   TSHA1Buf = array[0..4] of TSHA1Word;
-  TSHA1In = array[0..15] of TSHA1Word;
+  TSHA1In = packed record
+    case Integer of
+      0: (w: array[0..15] of TSHA1Word);
+      1: (b: array[0..63] of Byte);
+    end;
+
   TSHA1WArray = array[0..79] of TSHA1Word;
+
   TSHA1Context = record
     buf: TSHA1Buf;
     bytes: array[0..1] of TSHA1Word;
     in_: TSHA1In;
     W: TSHA1WArray;
   end;
+
   TSHA1Digest = array[0..19] of Byte;
 
 procedure SHA1Transform(var buf: TSHA1Buf; const in_: TSHA1In; var W: TSHA1WArray); forward;
@@ -682,11 +689,11 @@ begin
 
   t := 64 - (t and $3f); { Space available in ctx.in (at least 1) }
   if Cardinal(t) > Cardinal(len) then begin
-    Move(buf^, Pointer(RtcIntPtr(@ctx.in_) + 64 - t)^, len);
+    Move(buf^, ctx.in_.b[64 - t], len);
     Exit;
   end;
   { First chunk is an odd size }
-  Move(buf^, Pointer(RtcIntPtr(@ctx.in_) + 64 - t)^, t);
+  Move(buf^, ctx.in_.b[64 - t], t);
   SHA1Transform(ctx.buf, ctx.in_, ctx.W);
   Inc(buf, t);
   Dec(len, t);
@@ -732,8 +739,8 @@ begin
   FillChar(p^, count, 0);
 
   { Append length in bits and transform }
-  ctx.in_[15] := ByteSwap(ctx.bytes[0] shl 3);
-  ctx.in_[14] := ByteSwap((ctx.bytes[1] shl 3) or (ctx.bytes[0] shr 29));
+  ctx.in_.w[15] := ByteSwap(ctx.bytes[0] shl 3);
+  ctx.in_.w[14] := ByteSwap((ctx.bytes[1] shl 3) or (ctx.bytes[0] shr 29));
   SHA1Transform(ctx.buf, ctx.in_, ctx.W);
 
   for i := 0 to High(ctx.buf) do
@@ -759,7 +766,7 @@ var
 begin
   for t := 0 to 15 do begin
     { ByteSwap inlined: }
-    temp := in_[t];
+    temp := in_.w[t];
     W[t] := (temp shl 24) or
             ((temp and $FF00) shl 8) or
             ((temp and $FF0000) shr 8) or

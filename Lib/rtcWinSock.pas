@@ -21,7 +21,11 @@ interface
 
 {$IFDEF WINDOWS}
 
-{$A+}
+{$IFDEF WIN64}
+  {$A8}
+{$ELSE}
+  {$A+}
+{$ENDIF}
 
 uses
   Windows,

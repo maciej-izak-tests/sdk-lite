@@ -33,6 +33,7 @@ requires
 contains
   memBinTree in 'memBinTree.pas',
   memObjList in 'memObjList.pas',
+  memObjList64 in 'memObjList64.pas',
   memBinList in 'memBinList.pas',
   memPtrPool in 'memPtrPool.pas',
   memStringObjList in 'memStringObjList.pas',

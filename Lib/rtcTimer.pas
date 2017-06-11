@@ -28,7 +28,7 @@ uses
   SysUtils,
 
   memBinList,
-  memObjList,
+  memObjList64,
 
   rtcTypes,
   rtcInfo,
@@ -38,6 +38,9 @@ uses
 
 var
   LOG_TIMER_EXCEPTIONS:boolean={$IFDEF RTC_DEBUG}True{$ELSE}False{$ENDIF};
+
+  // Max "Sleep Time" (milliseconds) while waiting for the next timer event
+  RTC_TIMER_MAXSLEEP:Cardinal=$FFFF; // 65.5 seconds
 
 type
   // @Abstract(Events used by RTC Timer)
@@ -129,7 +132,7 @@ type
     procedure SetFinished(const Value: boolean);
 
   protected
-    FTriggers:tObjList;
+    FTriggers:tObjList64;
     FTimers:tBinList;
     FEvent:TRtcEvent;
     FCS:TRtcCritSec;
@@ -299,7 +302,7 @@ constructor TRtcTimerThread.Create(CreateSuspended: boolean);
   FreeOnTerminate:=True;
 
   FCS:=TRtcCritSec.Create;
-  FTriggers:=tObjList.Create(64);
+  FTriggers:=tObjList64.Create(128);
   FEvent:=TRtcEvent.Create(True,False);
 
   TimCS.Acquire;
@@ -351,9 +354,9 @@ procedure TRtcTimerThread.ExecuteTimer;
 
 procedure TRtcTimerThread.Execute;
   var
-    NextTrigger:RtcIntPtr;
+    NextTrigger,
+    SleepTime:int64;
     Tmp:TObject;
-    SleepTime:Cardinal;
   begin
   Trig:=nil;
   SleepTime:=0;
@@ -367,7 +370,7 @@ procedure TRtcTimerThread.Execute;
       if NextTrigger<=0 then // Nobody waiting
         begin
         FEvent.ResetEvent;
-        SleepTime:=WAIT_INFINITE;
+        SleepTime:=RTC_TIMER_MAXSLEEP;
         end
       else if NextTrigger<=MyTime then // Triggers ready for execution
         begin
@@ -377,7 +380,9 @@ procedure TRtcTimerThread.Execute;
       else
         begin
         FEvent.ResetEvent;
-        SleepTime:=Cardinal(int64(NextTrigger)-int64(MyTime));
+        SleepTime:=NextTrigger-MyTime;
+        if SleepTime>RTC_TIMER_MAXSLEEP then
+          SleepTime:=RTC_TIMER_MAXSLEEP;
         end;
       Tmp:=nil;
     finally
@@ -421,7 +426,7 @@ procedure TRtcTimerThread.SetFinished(const Value: boolean);
 
 procedure TRtcTimerThread.RemoveAllTriggers;
   var
-    Tmp2:RtcIntPtr;
+    Tmp2:int64;
     tl:TObject;
     bl:tBinList absolute tl;
   begin
@@ -447,7 +452,7 @@ procedure TRtcTimerThread.AddTrigger(Tim: TRtcTimer; TriggerTime: int64);
     tl:TObject;
     bl:tBinList absolute tl;
   begin
-  TriggerTime := GetTickTime64 + TriggerTime;
+  Inc(TriggerTime,GetTickTime64);
 
   FCS.Acquire;
   try
@@ -512,7 +517,7 @@ procedure TRtcTimerThread.ChangeTrigger(Tim: TRtcTimer; TriggerTime: int64);
     tl:TObject;
     bl:tBinList absolute tl;
   begin
-  TriggerTime := GetTickTime64 + TriggerTime;
+  Inc(TriggerTime,GetTickTime64);
   FCS.Acquire;
   try
     if Tim.FActive then

@@ -1123,7 +1123,7 @@ constructor TRtcClientModule.Create(AOwner: TComponent);
   FHyperThreading:=False;
 
   FIntCS:=TRtcCritSec.Create;
-  FIntRes:=TXObjList.Create(32);
+  FIntRes:=TXObjList.Create(16);
   FIntTimer:=nil;
 
   FPingTimer:=nil;
@@ -1141,7 +1141,7 @@ constructor TRtcClientModule.Create(AOwner: TComponent);
   FEncryptMode:=rem_Basic;
 
   FCS:=TRtcCritSec.Create;
-  FMyData:=tObjList.Create(32);
+  FMyData:=tObjList.Create(16);
   FMainThrData:=TRtcClientModuleData.Create;
 
   FExecuteResult:=nil;

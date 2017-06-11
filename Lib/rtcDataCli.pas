@@ -1874,7 +1874,7 @@ constructor TRtcDataClient.Create(AOwner: TComponent);
 
   FDataClientLinks:=TRtcDataClientLinkList.Create;
 
-  FRequestList:=TXObjList.Create(32);
+  FRequestList:=TXObjList.Create(16);
   FActiveRequest:=nil;
   FRequestSkipped:=0;
 
@@ -3752,7 +3752,7 @@ constructor TRtcDataRequest.Create(AOwner: TComponent);
   inherited Create(AOwner);
 
   FCS:=TRtcCritSec.Create;
-  FMyData:=tObjList.Create(32);
+  FMyData:=tObjList.Create(16);
   FMainThrData:=TRtcDataRequestData.Create;
 
   FWS:=TRtcWSManager.Create;

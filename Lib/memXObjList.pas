@@ -46,7 +46,7 @@ type
     constructor Create(size:integer);
     destructor Destroy; override;
 
-    function empty:boolean;
+    function Empty:boolean;
 
     function Count:cardinal;
 

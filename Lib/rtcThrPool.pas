@@ -64,6 +64,8 @@ var
   RTC_THREAD_POOL_CLOSELAST:word=5;
   // "Sleep" time (in milliseconds) after every executed job
   RTC_THREAD_SLEEP:integer=0;
+  // Time limit (milliseconds) for running multiple events in the Main Thread
+  RTC_THREAD_SYNCLIMIT:integer=250;
 
   // Thread Priority
 {$IFDEF WINDOWS}
@@ -452,10 +454,10 @@ type
   public
     X:TObject;
     end;
-  TProcEv=record
+  TProcEv=class(TObject)
     P:TRtcSyncEvent;
     E:TRtcEventEx;
-  end;
+    end;
   TSyThread=class(TThread)
   public
     constructor Create(CreateSuspended:boolean);
@@ -473,8 +475,34 @@ var
   SyReady:boolean;
   SyEV,
   SyOpen:TRtcEvent;
-  SyList:array of TProcEV;
+  SyList:tXObjList;
   SyCS:TRtcCritSec;
+
+procedure rtcSyncQuit;
+  var
+    SyObj:TProcEv;
+    xob:TObject absolute SyObj;
+  begin
+  xob:=nil;
+  SyCS.Acquire;
+  try
+    SyList.extractFirst(xob);
+  finally
+    SyCS.Release;
+    end;
+  while assigned(xob) do
+    begin
+    SyObj.E.SetEvent;
+    SyObj:=nil;
+
+    SyCS.Acquire;
+    try
+      SyList.extractFirst(xob);
+    finally
+      SyCS.Release;
+      end;
+    end;
+  end;
 
 { Is the RTC Thread Pool ready? }
 function RtcThreadPoolReady:boolean;
@@ -1711,6 +1739,11 @@ procedure CloseThreadPool;
     {$ELSE}
     WaitForSynClose(RTC_THREAD_POOL_CLOSEWAIT);
     {$ENDIF}
+
+    rtcSyncQuit;
+
+    rtcSyncProc:=MySyncNone;
+    rtcSyncCheckProc:=MySyncCheckNone;
     end;
 
   CSThread.Acquire;
@@ -1786,7 +1819,7 @@ constructor TRtcThread.Create;
     raise Exception.Create('Thread Pool already closed.');
     end;
 
-  MsgList:=TXObjList.Create(32);
+  MsgList:=TXObjList.Create(16);
   FInfo:=TRtcInfo.Create;
   FNeedThread:=False;
 
@@ -2521,80 +2554,72 @@ function TRtcJob.SingleUse:boolean;
 
 procedure rtcSyncExecute;
   var
-    xproc:TRtcSyncEvent;
-    xev:TRtcEventEx;
-    a, loc:integer;
-    done,have:boolean;
     tim:int64;
+    SyObj:TProcEv;
+    xob:TObject absolute SyObj;
   begin
-  xproc:=nil;
-  xev:=nil;
-  done:=False;
+  xob:=nil;
   tim:=GetTickTime64;
-  loc:=0;
-  repeat
+
+  SyCS.Acquire;
+  try
+    SyList.extractFirst(xob);
+    if xob=nil then
+      begin
+      SyEV.ResetEvent;
+      SyReady:=False;
+      end;
+  finally
+    SyCS.Release;
+    end;
+
+  while assigned(xob) do
+    begin
+    try
+      SyObj.P;
+    except
+      { Acquire Exception Object here. We need to raise the
+        Exception from the background Thread calling "Sync" }
+      SyObj.E.X:=TObject(AcquireExceptionObject);
+      end;
+    SyObj.E.SetEvent;
+    SyObj:=nil;
+
+    if GetTickTime64-tim>RTC_THREAD_SYNCLIMIT then
+      Break; // working too long
+
     SyCS.Acquire;
     try
-      have:=SyReady and (loc<length(SyList));
-      if have then
+      SyList.extractFirst(xob);
+      if xob=nil then
         begin
-        with SyList[loc]do
-          begin
-          xproc:=P;
-          xev:=E;
-          E:=nil;
-          end;
-        Inc(loc);
-        if loc=length(SyList) then
-          begin
-          SyEV.ResetEvent;
-          SetLength(SyList,0);
-          done:=True;
-          SyReady:=False;
-          end
-        else if (GetTickTime64-Tim>1000) or (loc>100) then // working too long
-          begin
-          for a:=loc to length(SyList)-1 do
-            SyList[a-loc]:=SyList[a];
-          SetLength(SyList,length(SyList)-loc);
-          done:=True;
-          end;
-        end
-      else
-        done:=True;
+        SyEV.ResetEvent;
+        SyReady:=False;
+        end;
     finally
       SyCS.Release;
       end;
-    if have then
-      begin
-      try
-        xproc;
-      except
-        { Acquire Exception Object here. We need to raise the
-          Exception from the background Thread calling "Sync" }
-        xev.X:=TObject(AcquireExceptionObject);
-        end;
-      xev.SetEvent;
-      end;
-    until done;
+    end;
   end;
 
 procedure MySyncProc(Proc: TRtcSyncEvent);
   var
     EV:TRtcEventEx;
     X:TObject;
+    SyObj:TProcEv;
   begin
   EV:=TRtcEventEx.Create(True,False);
   EV.X:=nil;
+  SyObj:=TProcEv.Create;
+  with SyObj do
+    begin
+    P:=Proc;
+    E:=EV;
+    end;
   try
     SyCS.Acquire;
     try
-      SetLength(SyList, length(SyList)+1);
-      with SyList[length(SyList)-1] do
-        begin
-        P:=Proc;
-        E:=EV;
-        end;
+      SyList.addLast(SyObj);
       SyReady:=True;
       SyEV.SetEvent;
     finally
@@ -2604,7 +2629,10 @@ procedure MySyncProc(Proc: TRtcSyncEvent);
     X:=EV.X;
   finally
     EV.X:=nil;
+    SyObj.E:=nil;
+    SyObj.P:=nil;
     EV.Free;
+    SyObj.Free;
     end;
 
   if Assigned(X) then
@@ -2679,7 +2707,7 @@ ThrList:=tObjList.Create(128);
 WaitList:=tXObjList.Create(128);
 
 SyReady:=False;
-SetLength(SyList,0);
+SyList:=tXObjList.Create(128);
 SyCS:=TRtcCritSec.Create;
 SyEV:=TRtcEvent.Create(True,False);
 SyOpen:=TRtcEvent.Create(True,False);
@@ -2717,7 +2745,7 @@ RtcFreeAndNil(Message_Quit);
 RtcFreeAndNil(SyCS);
 RtcFreeAndNil(SyEV);
 RtcFreeAndNil(SyOpen);
-SetLength(SyList,0);
+RtcFreeAndNil(SyList);
 {$IFDEF RTC_DEBUG}Log('Sync Events List.','DEBUG');{$ENDIF}
 
 {$IFDEF RTC_DEBUG} Log('rtcThrPool Finalized.','DEBUG');{$ENDIF}

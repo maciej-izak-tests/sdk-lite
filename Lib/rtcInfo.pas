@@ -33,6 +33,13 @@ unit rtcInfo;
   {$DEFINE RTC_OBJECT_CLASS}
 {$ENDIF}
 
+{ Declaring "RTC_TICKTIME_DEBUG" forces the internal "Tick Timer" to 
+  overflow once every 131 seconds instead of only once every 49 days. 
+  This is used for debugging RTC Timers, RTC Thread Synchronization 
+  and "GetTickTime/64" functions. Unless you are debugging these RTC 
+  functions, do NOT declare this compiler define for your Project! }
+{.$DEFINE RTC_TICKTIME_DEBUG}
+
 interface
 
 uses
@@ -6883,16 +6890,17 @@ function Str2Int64Def(const s:RtcString; def:int64):int64; overload;
 function LWordTo6bit(const i: Cardinal):RtcString;
 function LWordFrom6bit(const r: RtcString):Cardinal;
 
-{ Cross-platform version of "GetTickCount" (in miliseconds).
-  WARNING: Because "Cardinal" is a 32-bit integer type and this function returns
-  the number of milliseconds (1/1000th of a second) since the last System start, it
-  should NOT be used for Time measuremenet on Systems which run longer than 49 days
-  without a System restart, because GetTickTime will overflow once every 49 days. }
+{ Returns the number of milliseconds passsed since the Application was started (32-bit version).
+  WARNING: Because "Cardinal" is a 32-bit integer type and this function returns the number of 
+  milliseconds (1/1000th of a second) passed since the last time this APPLICATION was start, 
+  the "GetTickTime" function should NOT be used to measure Time in Applications running
+  longer than 49.7 days, because "GetTickTime" will overflow once every 49.7 days. }
 function GetTickTime:Cardinal;
 
-{ Cross-platform version of "GetTickCount" (in miliseconds) with overflow handling.
-  For this function to work correctly, it has to be used at least once every 49 days,
-  or the integrated overflow hanling will NOT adjust the time when "GetTickCount" overflows. }
+{ Returns the number of milliseconds passed since the Application was started (64-bit version).
+  If there are no TRtcTimer instances active, then this function should be called at least
+  once every 49.7 days for the integrated "GetTickCount" overflow hanling to work correctly.
+  "GetTickTime64" is used internally by RTC Timers and Timeouts to trigger timed events. }
 function GetTickTime64:int64;
 
 { Return ID of the current Thread (GetCurrentThreadID) }
@@ -7594,7 +7602,7 @@ function GetMyThreadID:RtcThrID;
   end;
 {$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}
 
-function GetTickTime:Cardinal;
+function Get_TickTime:Cardinal;
 {$IFDEF WINDOWS}
   begin
   Result:=GetTickCount;
@@ -7628,7 +7636,7 @@ function GetTickTime:Cardinal;
 {$ELSE}
   begin
   Result:=0;
-  {$MESSAGE WARN 'GetTickTime implementation missing.'}
+  {$MESSAGE WARN 'Get_TickTime implementation missing.'}
   end;
 {$ENDIF}{$ENDIF}{$ENDIF}
 
@@ -7637,25 +7645,40 @@ var
   TickTimeOverflow:int64;
   TickTimeCS:TRtcCritSec;
 
+const
+{$IFDEF RTC_TICKTIME_DEBUG}
+  TickTimeOverflowMask=Cardinal($1FFFF); // 131 seconds
+  TickTimeOverflowDiff=-int64($3FF); // -1 seconds
+{$ELSE}
+  TickTimeOverflowMask=Cardinal($FFFFFFFF); // 49.7 days
+  TickTimeOverflowDiff=-int64($1FFFF); // -131 seconds
+{$ENDIF}
+
 function GetTickTime64:int64;
   var
-    CurrentTickTime:int64;
+    CurrentTick:int64;
   begin
-  CurrentTickTime:=GetTickTime;
-  if CurrentTickTime-LastTickTime<-60000 then // overflow with at least 1 minute difference
+  CurrentTick:=TickTimeOverflow+1;
+  Inc(CurrentTick,Get_TickTime and TickTimeOverflowMask);
+  if CurrentTick-LastTickTime<TickTimeOverflowDiff then
     begin
+    LastTickTime:=CurrentTick+TickTimeOverflowMask;
     TickTimeCS.Acquire;
     try
-      if CurrentTickTime-LastTickTime<-60000 then // check again in safety (multi-treaded)
-        Inc(TickTimeOverflow,Cardinal($FFFFFFFF));
-      LastTickTime:=CurrentTickTime;
+      if CurrentTick>TickTimeOverflow then
+        Inc(TickTimeOverflow,TickTimeOverflowMask);
     finally
       TickTimeCS.Release;
       end;
     end
-  else if CurrentTickTime>LastTickTime then
-    LastTickTime:=CurrentTickTime;
-  Result:=TickTimeOverflow+CurrentTickTime;
+  else
+    LastTickTime:=CurrentTick;
+  Result:=LastTickTime;
+  end;
+
+function GetTickTime:Cardinal;
+  begin
+  Result:=Cardinal(GetTickTime64);
   end;
 
 function GetTempDirectory:RtcWideString;
@@ -24474,6 +24497,8 @@ procedure TRtcFunctionInfo.from_XMLREST(const s: RtcString; var at: integer; con
 
   SetLength(tags,0);
   try
+    c_tag:='';
+
     xtag:=Upper_Case(xmlrpc_checkTag(s,at));
     if (xtag='PARAMS') or (xtag='PARAM') then // we could have parameters
       begin
@@ -33279,9 +33304,9 @@ function TRtcObject.SingleUse: boolean;
 {$ENDIF}
 
 initialization
-LastTickTime:=GetTickTime;
-TickTimeOverflow:=0;
 TickTimeCS:=TRtcCritSec.Create;
+TickTimeOverflow:=-int64(Get_TickTime and TickTimeOverflowMask);
+LastTickTime:=0;
 
 AppFileName:=ExpandUNCFileName(RtcWideString(ParamStr(0)));
 

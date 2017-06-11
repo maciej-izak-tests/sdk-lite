@@ -1443,7 +1443,7 @@ procedure TRtcRemoteObjectManager._Subscribe(const xLink: TRtcObjectLink; const 
     try
       if not assigned(FChannels) then
         begin
-        FChannels:=tStringObjList.Create(32);
+        FChannels:=tStringObjList.Create(16);
         o:=nil;
         end
       else
@@ -1456,7 +1456,7 @@ procedure TRtcRemoteObjectManager._Subscribe(const xLink: TRtcObjectLink; const 
         o:=SubscribeManagers.search(FBroadcastGroup+'.'+xChannel);
         if not assigned(o) then // 1st subscription for channel "xChannel" in group "BroadcastGroup"
           begin
-          objs2:=tObjList.Create(32);
+          objs2:=tObjList.Create(16);
           SubscribeManagers.insert(FBroadcastGroup+'.'+xChannel,objs2);
           end
         else // Object(s) from another Object Manager have already subscribed

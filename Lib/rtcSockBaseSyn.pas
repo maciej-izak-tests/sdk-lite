@@ -277,8 +277,8 @@ constructor TRtcSocketBaseSyn.Create;
 
   FCS:=TRtcCritSec.Create;
 
-  Socks:=tXObjList.Create(32);
-  MsgQ:=tXList.Create(32);
+  Socks:=tXObjList.Create(16);
+  MsgQ:=tXList.Create(16);
 
   Thr:=nil;
 

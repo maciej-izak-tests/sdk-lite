@@ -271,6 +271,7 @@ type
     FForceThread: boolean;
 
    procedure SetForceThread(Value:boolean);
+   procedure SetSerialized(Value:boolean);
 
   public
 
@@ -323,7 +324,7 @@ type
       all jobs posted using this component will be executed in order, one at a time.
       When Serialized=False, a new virtual thread will be created for every job
       posted, allowing all jobs to run at the same time, each in its own thread. }
-    property Serialized:boolean read FSerialized write FSerialized default False;
+    property Serialized:boolean read FSerialized write SetSerialized default False;
 
     { Event to be executed }
     property OnExecute:TRtcQuickJobEvent read FEvent write FEvent;
@@ -438,14 +439,26 @@ procedure AddThreadCallback(const Callback:TRtcThreadCallback);
 { Return TRUE if we are inside the Main Thread now }
 function InsideMainThread:boolean;
 
-{ Returns the number of Busy Worker Threads. }
+{ Returns the number of Busy Worker Threads.
+  This call is almost as expensive as posting a job to the Thread Pool,
+  because it has to acquire and release a lock on the RTC Thread Pool,
+  so ... do NOT call it very often, to avoid a performance penalty. }
 function RtcTotalThreadsBusy:integer;
 
-{ Returns the number of Idle Worker Threads. }
+{ Returns the number of Idle Worker Threads.
+  This call is almost as expensive as posting a Job to the Thread Pool,
+  because it has to acquire and release a lock on the RTC Thread Pool,
+  so ... do NOT call it very often, to avoid a performance penalty. }
 function RtcTotalThreadsIdle:integer;
 
-{ Is the RTC Thread Pool ready? }
+{ Is the RTC Thread Pool ready? This function ONLY has to check the
+  state of a global boolean variable, so it is safe to be caled often. }
 function RtcThreadPoolReady:boolean;
+
+{ Returns the number of Jobs in the RTC Thread Queue, waiting for execution.
+  This function ONLY has to check the state of a global integer variable,
+  so it can be called often - without a serious performance penalty. }
+function RtcTotalJobsQueued:int64;
 
 implementation
 
@@ -760,13 +773,14 @@ function rtcSyncCheck:boolean;
 constructor TRtcQuickJob.Create(AOwner:TComponent);
   begin
   inherited Create(AOwner);
-  FThr:=TRtcThread.Create;
+  FThr:=nil;
+  FSerialized:=False;
   FForceThread:=False;
   end;
 
 destructor TRtcQuickJob.Destroy;
   begin
-  TRtcThread.Stop(FThr);
+  Stop;
   inherited;
   end;
 
@@ -777,6 +791,20 @@ procedure TRtcQuickJob.SetForceThread(Value:boolean);
     FForceThread:=Value;
     if assigned(FThr) then
       FThr.NeedThread:=FForceThread;
+    end;
+  end;
+
+procedure TRtcQuickJob.SetSerialized(Value:boolean);
+  begin
+  if Value<>FSerialized then
+    begin
+    FSerialized:=Value;
+    if Value then
+      if not assigned(FThr) then
+        begin
+        FThr:=TRtcThread.Create;
+        FThr.NeedThread:=FForceThread;
+        end;
     end;
   end;
 
@@ -832,7 +860,11 @@ function TRtcQuickJob.JobRunning:boolean;
 
 procedure TRtcQuickJob.Stop;
   begin
-  TRtcThread.Stop(FThr);
+  if assigned(FThr) then
+    begin
+    TRtcThread.Stop(FThr);
+    FThr:=nil;
+    end;
   end;
 
 { TRtcMyQuickJob }
@@ -1328,6 +1360,8 @@ function InsideMainThread:boolean;
   end;
 
 var
+  Jobs_In_Queue:int64;
+
   ThreadPtrPool:TObjList; // all running threads (sorted by TRtcWorkerThread pointers)
   ThreadIdPool:TObjList; // all running threads (sorted by Thread IDs)
   NormalThreadCnt,
@@ -1349,6 +1383,11 @@ var
 
   OpenCnt:integer;
   CSOpen:TRtcEvent;
+
+function RtcTotalJobsQueued:int64;
+  begin
+  Result:=Jobs_In_Queue;
+  end;
 
 { Add a new Thread Callback }
 procedure AddThreadCallback(const Callback:TRtcThreadCallback);
@@ -1723,7 +1762,7 @@ procedure CloseThreadPool;
     CSThread.Release;
     end;
 
-  {$IFDEF RTC_DEBUG}Log('CloseThreadPool begin ...','DEBUG');{$ENDIF}
+  {$IFDEF RTC_DEBUG}Log('CloseThreadPool ('+IntToStr(RtcTotalJobsQueued)+' Queued / '+IntToStr(RtcTotalThreadsBusy)+' Busy / '+IntToStr(RtcTotalThreadsIdle)+' Idle) begin ...','DEBUG');{$ENDIF}
 
   if SyThr_Running then
     begin
@@ -1798,7 +1837,7 @@ procedure CloseThreadPool;
   if haveto_removecallbacks then
     RemoveThreadCallbacks;
 
-  {$IFDEF RTC_DEBUG}Log('CloseThreadPool end.','DEBUG');{$ENDIF}
+  {$IFDEF RTC_DEBUG}Log('CloseThreadPool ('+IntToStr(RtcTotalJobsQueued)+' Queued / '+IntToStr(RtcTotalThreadsBusy)+' Busy / '+IntToStr(RtcTotalThreadsIdle)+' Idle) end.','DEBUG');{$ENDIF}
   end;
 
 { TRtcThread }
@@ -1840,18 +1879,17 @@ function TRtcThread.Finalize:boolean;
   begin
   Result:=False;
   if self=nil then Exit;
-  CSThread.Acquire;
-  try
-    if ThrList.search(RtcIntPtr(self))<>self then Exit;
-    ThrList.remove(RtcIntPtr(self));
-  finally
-    CSThread.Release;
-    end;
+  if ThrList.search(RtcIntPtr(self))<>self then Exit;
+
+  ThrList.remove(RtcIntPtr(self));
+  Dec(Jobs_In_Queue,MsgList.Count);
+
   if Waiting then
     begin
     WaitList.removeThis(self);
     Waiting:=False;
     end;
+
   Active:=False;
 
   while MsgList.Count>0 do
@@ -2016,6 +2054,7 @@ class function TRtcThread.PostJob(me:TObject; var myJob; HighPriority:boolean=Fa
           begin
           if HighPriority then
             begin
+            Inc(Jobs_In_Queue);
             MsgList.addFirst(_Job);
             if _Job is TRtcJob then
               if TRtcJob(_Job).SingleUse then
@@ -2025,6 +2064,7 @@ class function TRtcThread.PostJob(me:TObject; var myJob; HighPriority:boolean=Fa
             end
           else if Threads_Running then
             begin
+            Inc(Jobs_In_Queue);
             MsgList.addLast(_Job);
             if _Job is TRtcJob then
               if TRtcJob(_Job).SingleUse then
@@ -2051,6 +2091,7 @@ class function TRtcThread.PostJob(me:TObject; var myJob; HighPriority:boolean=Fa
             end
           else
             begin
+            Inc(Jobs_In_Queue);
             MsgList.addFirst(_Job);
             if _Job is TRtcJob then
               if TRtcJob(_Job).SingleUse then
@@ -2089,6 +2130,7 @@ class function TRtcThread.PostJob(me:TObject; var myJob; HighPriority:boolean=Fa
             end
           else
             begin
+            Inc(Jobs_In_Queue);
             MsgList.addLast(_Job);
             if _Job is TRtcJob then
               if TRtcJob(_Job).SingleUse then
@@ -2103,6 +2145,7 @@ class function TRtcThread.PostJob(me:TObject; var myJob; HighPriority:boolean=Fa
           end
         else if Waiting then
           begin
+          Inc(Jobs_In_Queue);
           MsgList.addLast(_Job);
           if _Job is TRtcJob then
             if TRtcJob(_Job).SingleUse then
@@ -2123,6 +2166,7 @@ class function TRtcThread.PostJob(me:TObject; var myJob; HighPriority:boolean=Fa
             end
           else
             begin
+            Inc(Jobs_In_Queue);
             MsgList.addLast(_Job);
             if _Job is TRtcJob then
               if TRtcJob(_Job).SingleUse then
@@ -2227,6 +2271,7 @@ class function TRtcThread.Sync(Event: TRtcSyncEvent):boolean;
 procedure TRtcThread.GetJob;
   begin
   MsgList.extractFirst(Job);
+  Dec(Jobs_In_Queue);
   end;
 
 function TRtcThread.RunJob:boolean;
@@ -2608,6 +2653,8 @@ procedure MySyncProc(Proc: TRtcSyncEvent);
     X:TObject;
     SyObj:TProcEv;
   begin
+  if not Threads_Running then Exit;
+
   EV:=TRtcEventEx.Create(True,False);
   EV.X:=nil;
   SyObj:=TProcEv.Create;
@@ -2619,6 +2666,13 @@ procedure MySyncProc(Proc: TRtcSyncEvent);
   try
     SyCS.Acquire;
     try
+      if not SyThr_Running then
+        if Threads_Running then
+          begin
+          SyThr_Running:=True;
+          TSyThread.Create(False);
+          end;
+
       SyList.addLast(SyObj);
       SyReady:=True;
       SyEV.SetEvent;
@@ -2685,8 +2739,10 @@ procedure TSyThread.Execute;
 initialization
 {$IFDEF RTC_DEBUG} Log('rtcThrPool Initializing ...','DEBUG');{$ENDIF}
 
+Jobs_In_Queue:=0;
 MainThrID:=GetMyThreadID;
 
+SyThr_Running:=False;
 Threads_Running:=True;
 ThreadCallbackCount:=0;
 SetLength(ThreadCallbacks,0);
@@ -2713,9 +2769,6 @@ SyEV:=TRtcEvent.Create(True,False);
 SyOpen:=TRtcEvent.Create(True,False);
 rtcSyncProc:=MySyncProc;
 rtcSyncCheckProc:=MySyncCheck;
-
-SyThr_Running:=True;
-TSyThread.Create(False);
 
 {$IFDEF RTC_DEBUG} Log('rtcThrPool Initialized.','DEBUG');{$ENDIF}
 finalization

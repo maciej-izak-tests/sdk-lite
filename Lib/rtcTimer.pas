@@ -76,6 +76,8 @@ type
       @exclude }
     class procedure Timer(me:TObject);
 
+    function GetMyThr:TRtcThread;
+
     property LastTrigger:int64 read FLastTrigger write FLastTrigger;
 
   public
@@ -113,7 +115,7 @@ type
     class procedure Tick(me:TObject);
 
     { Access to the internal RTC Thread object, used if this class was created with Multi_Threaded=True }
-    property Thread:TRtcThread read FMyThr;
+    property Thread:TRtcThread read GetMyThr;
     end;
 
 procedure CloseTimerPool;
@@ -574,7 +576,7 @@ constructor TRtcTimer.Create(Multi_Threaded:boolean; Back_Thread:TRtcThread=nil)
       begin
       if Back_Thread=nil then
         begin
-        FMyThr:=TRtcThread.Create;
+        FMyThr:=nil;
         FMyThrOwner:=True;
         end
       else
@@ -807,6 +809,8 @@ class procedure TRtcTimer.Enable(me:TObject; Wait: Cardinal; Event: TRtcTimerEve
           begin
           FAutoDisable:=AutoDisable or AutoDestroy;
           FAutoDestroy:=AutoDestroy;
+          if FMyThrOwner and (FMyThr=nil) then
+            FMyThr:=TRtcThread.Create;
           FThr:=FMyThr;
           FJob:=nil;
           FEvent:=Event;
@@ -846,7 +850,11 @@ class procedure TRtcTimer.Enable(me:TObject; Wait:Cardinal; Job:TObject; Thr:TRt
           FAutoDestroy:=AutoDestroy;
           FEvent:=nil;
           if Thr=nil then
-            FThr:=FMyThr
+            begin
+            if FMyThrOwner and (FMyThr=nil) then
+              FMyThr:=TRtcThread.Create;
+            FThr:=FMyThr;
+            end
           else
             FThr:=Thr;
           FJob:=Job;
@@ -875,6 +883,24 @@ class procedure TRtcTimer.Enable(me:TObject; Wait:Cardinal; Job:TObject; Thr:TRt
         end;
   end;
 
+function TRtcTimer.GetMyThr: TRtcThread;
+  begin
+  if assigned(FMyThr) then
+    Result:=FMyThr
+  else if FMyThrOwner then
+    begin
+    if rtcEnterTimer(RtcIntPtr(self)) then
+      try
+        if FMyThrOwner and (FMyThr=nil) then
+          FMyThr:=TRtcThread.Create;
+      finally
+        rtcLeaveTimer;
+        end;
+    Result:=FMyThr;
+    end
+  else
+    Result:=nil;
+  end;
 
 initialization
 {$IFDEF RTC_DEBUG} Log('rtcTimer Initializing ...','DEBUG');{$ENDIF}

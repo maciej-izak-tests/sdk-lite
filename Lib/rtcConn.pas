@@ -6425,14 +6425,14 @@ function TRtcConnection.ws_ClearTempFrames:boolean;
     obj:=FWSFrameIN;
     if assigned(obj) then
       if iFrame.waFinal and iFrame.wfComplete then
-        iFrame.Free;
+        RtcFreeAndNil(iFrame);
 
     if assigned(FWSFrameOther) then
       while FWSFrameOther.Count>0 do
         begin
         obj:=FWSFrameOther.First;
         if iFrame.waFinal and iFrame.wfComplete then
-          iFrame.Free
+          RtcFreeAndNil(iFrame)
         else
           Break;
         end;
@@ -6484,7 +6484,7 @@ function TRtcConnection.ws_ClearSendingQueue:boolean;
       begin
       FWSFrameQueued.extractFirst(frm);
       if frm<>nil then
-        frm.Free;
+        RtcFreeAndNil(frm);
       end;
     end;
   end;
@@ -6498,25 +6498,25 @@ procedure TRtcConnection.ws_Clear;
 
   frm:=FWSFrameIN;
   if assigned(frm) then
-    frm.Free;
+    RtcFreeAndNil(frm);
 
   frm:=FWSFrameOUT;
   if assigned(frm) then
-    frm.Free;
+    RtcFreeAndNil(frm);
 
   if assigned(FWSFrameOther) then
     while FWSFrameOther.Count>0 do
       begin
       FWSFrameOther.extractFirst(frm);
       if frm<>nil then
-        frm.Free;
+        RtcFreeAndNil(frm);
       end;
   if assigned(FWSFrameQueued) then
     while FWSFrameQueued.Count>0 do
       begin
       FWSFrameQueued.extractFirst(frm);
       if frm<>nil then
-        frm.Free;
+        RtcFreeAndNil(frm);
       end;
   end;
 
@@ -6630,7 +6630,7 @@ function TRtcConnection.wSendToAll(iFrame: TRtcWSFrame; const iName: RtcWideStri
   if (self=nil) or (FWS=nil) then
     begin
     Result:=0;
-    iFrame.Free;
+    RtcFreeAndNil(iFrame);
     end
   else
     Result:=FWS.wSendToAll(iFrame,iName);
@@ -6641,7 +6641,7 @@ function TRtcConnection.wSendToIdle(iFrame: TRtcWSFrame; const iName: RtcWideStr
   if (self=nil) or (FWS=nil) then
     begin
     Result:=0;
-    iFrame.Free;
+    RtcFreeAndNil(iFrame);
     end
   else
     Result:=FWS.wSendToIdle(iFrame,iName);
@@ -6652,7 +6652,7 @@ function TRtcConnection.wSendToOthers(xid: RtcIntPtr; iFrame: TRtcWSFrame; const
   if (self=nil) or (FWS=nil) then
     begin
     Result:=0;
-    iFrame.Free;
+    RtcFreeAndNil(iFrame);
     end
   else
     Result:=FWS.wSendToOthers(xid,iFrame,iName);
@@ -8013,7 +8013,7 @@ function TRtcWSManager.wSend(id: RtcIntPtr; iFrame: TRtcWSFrame; const iName: Rt
       FCS.Release;
       end;
   finally
-    iFrame.Free;
+    RtcFreeAndNil(iFrame);
     end;
   end;
 
@@ -8070,7 +8070,7 @@ function TRtcWSManager.wSendIfIdle(id: RtcIntPtr; iFrame: TRtcWSFrame; const iNa
       FCS.Release;
       end;
   finally
-    iFrame.Free;
+    RtcFreeAndNil(iFrame);
     end;
   end;
 
@@ -8099,7 +8099,7 @@ function TRtcWSManager.wSendToAll(iFrame: TRtcWSFrame; const iName: RtcWideStrin
       FCS.Release;
       end;
   finally
-    iFrame.Free;
+    RtcFreeAndNil(iFrame);
     end;
   end;
 
@@ -8128,7 +8128,7 @@ function TRtcWSManager.wSendToIdle(iFrame: TRtcWSFrame; const iName: RtcWideStri
       FCS.Release;
       end;
   finally
-    iFrame.Free;
+    RtcFreeAndNil(iFrame);
     end;
   end;
 
@@ -8160,7 +8160,7 @@ function TRtcWSManager.wSendToOthers(xid: RtcIntPtr; iFrame: TRtcWSFrame; const 
       FCS.Release;
       end;
   finally
-    iFrame.Free;
+    RtcFreeAndNil(iFrame);
     end;
   end;
 

@@ -3587,7 +3587,7 @@ function TRtcDataProvider.wSendToAll(iFrame: TRtcWSFrame; const iName: RtcWideSt
   if (self=nil) or (FWS=nil) then
     begin
     Result:=0;
-    iFrame.Free;
+    RtcFreeAndNil(iFrame);
     end
   else
     Result:=FWS.wSendToAll(iFrame,iName);
@@ -3598,7 +3598,7 @@ function TRtcDataProvider.wSendToIdle(iFrame: TRtcWSFrame; const iName: RtcWideS
   if (self=nil) or (FWS=nil) then
     begin
     Result:=0;
-    iFrame.Free;
+    RtcFreeAndNil(iFrame);
     end
   else
     Result:=FWS.wSendToIdle(iFrame,iName);
@@ -3609,7 +3609,7 @@ function TRtcDataProvider.wSendToOthers(xid: RtcIntPtr; iFrame: TRtcWSFrame; con
   if (self=nil) or (FWS=nil) then
     begin
     Result:=0;
-    iFrame.Free;
+    RtcFreeAndNil(iFrame);
     end
   else
     Result:=FWS.wSendToOthers(xid,iFrame,iName);

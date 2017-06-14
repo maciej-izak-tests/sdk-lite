@@ -7157,7 +7157,7 @@ function TRtcObjectLink.isRemoteDestroyed: boolean;
 
 procedure TRtcObjectLink.DestroyOwner;
   begin
-  FOwner.Free;
+  {$IFDEF AUTOREFCOUNT} FOwner.DisposeOf; {$ELSE} FOwner.Free; {$ENDIF}
   // Our instance will be destroyed by the Owner
   end;
 

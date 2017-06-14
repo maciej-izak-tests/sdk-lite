@@ -3519,10 +3519,7 @@ procedure TRtcClientModule.CancelCalls;
     FPostLevel:=0;
 
     if assigned(FCalls) then
-      begin
-      FCalls.Free;
-      FCalls:=nil;
-      end;
+      RtcFreeAndNil(FCalls);
     end;
 
   ClearMyData;

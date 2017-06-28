@@ -12815,9 +12815,21 @@ class function TRtcValueObject.json_checkFunctionType(const s:RtcWideString; con
             if ( json_checkTag(RTC_Q20,s,at2,true) or
                  json_checkTag(RTC_Q10,s,at2,true) ) then
               if json_checkTag(',',s,at2,true) then
+                begin
+                if json_checkTag(RTC_QID,s,at2,true) then
+                  begin
+                  if not json_checkTag(':',s,at2,true) then Exit;
+                  if not json_checkTag(RTC_SNULL,s,at2,true) then // skip null
+                    if json_checkTagList(RTC_QNUMBERSTRING,s,at2) then
+                      json_readString(s,at2) // skip value
+                    else
+                      Exit;
+                  if not json_checkTag(',',s,at2,true) then Exit;
+                  end;
                 if ( json_checkTag(RTC_QMETHOD,s,at2) or
                      json_checkTag(RTC_QPARAMS,s,at2) ) then
                   Result:=rtc_Function;
+                end;
           end
         else if (rVer and 5>0) and json_checkTag(RTC_QMETHOD,s,at2,true) then
           begin
@@ -12870,6 +12882,17 @@ class function TRtcValueObject.json_checkResultType(const s:RtcWideString; const
             if ( json_checkTag(RTC_Q20,s,at2,true) or
                  json_checkTag(RTC_Q10,s,at2,true) ) then
               if json_checkTag(',',s,at2,true) then
+                begin
+                if json_checkTag(RTC_QID,s,at2,true) then
+                  begin
+                  if not json_checkTag(':',s,at2,true) then Exit;
+                  if not json_checkTag(RTC_SNULL,s,at2,true) then // skip null
+                    if json_checkTagList(RTC_QNUMBERSTRING,s,at2) then
+                      json_readString(s,at2) // skip value
+                    else
+                      Exit;
+                  if not json_checkTag(',',s,at2,true) then Exit;
+                  end;
                 if json_checkTag(RTC_QERROR,s,at2) or
                    json_checkTag(RTC_QERRORS,s,at2) or
                    json_checkTag(RTC_QCODE,s,at2) or
@@ -12880,12 +12903,13 @@ class function TRtcValueObject.json_checkResultType(const s:RtcWideString; const
                     begin
                     Result:=rtc_Variant;
                     if json_checkTag(RTC_SNULL,s,at2,true) then
-                      if json_checkTag(',',s,at2,true) then
+                            if json_checkTag(',',s,at2,true) then
                         if json_checkTag(RTC_QERROR,s,at2,true) then
                           if json_checkTag(':',s,at2,true) then
                             if json_checkTag('{',s,at2) then
                               Result:=rtc_Exception;
                     end;
+                end;
           end
         else if (rVer and 1=1) and
                 json_checkTag(RTC_QERROR,s,at2,true) then
@@ -12960,6 +12984,16 @@ class function TRtcValueObject.json_checkStrType(const s:RtcWideString; const at
                          json_checkTag(RTC_Q10,s,at2,true) ) then
                       if json_checkTag(',',s,at2,true) then
                         begin
+                        if json_checkTag(RTC_QID,s,at2,true) then
+                          begin
+                          if not json_checkTag(':',s,at2,true) then Exit;
+                          if not json_checkTag(RTC_SNULL,s,at2,true) then // skip null
+                            if json_checkTagList(RTC_QNUMBERSTRING,s,at2) then
+                              json_readString(s,at2) // skip value
+                            else
+                              Exit;
+                          if not json_checkTag(',',s,at2,true) then Exit;
+                          end;
                         if RTC_JSON_ParseRPC2Functions and
                           ( json_checkTag(RTC_QMETHOD,s,at2) or
                             json_checkTag(RTC_QPARAMS,s,at2) ) then
@@ -14392,8 +14426,15 @@ procedure TRtcExceptionValue.from_JSON(const s:RtcWideString; var at: integer; c
           FData:=TRtcValue.FromJSON(s,at,MaxDepth-1);
           end;
         end
+      else if json_checkTag(RTC_QID,s,at,true) then
+        begin
+        json_skipTag(':',s,at);
+        json_skipWhitespace(s,at);
+        if not json_checkTag(RTC_SNULL,s,at,true) then
+          {ID:=}json_readString(s,at); // ignore
+        end
       else
-        raise ERtcInfo.Create('JSON Error @'+IntToStr(at)+': Expecting "code", "message", "errors" or "data" inside "error"');
+        raise ERtcInfo.Create('JSON Error @'+IntToStr(at)+': Expecting "code", "message", "errors" or "data" inside a "jsonrpc" error object');
       until not json_checkTag(',',s,at,true);
     end;
   begin
@@ -14438,7 +14479,7 @@ procedure TRtcExceptionValue.from_JSON(const s:RtcWideString; var at: integer; c
             {ID:=}json_readString(s,at); // ignore
           end
         else
-          raise ERtcInfo.Create('JSON Error @'+IntToStr(at)+': Expecting "error", "result" or "id" inside "jsonrpc"');
+          ParseErrorInfo;
         until not json_checkTag(',',s,at,true);
       end
     else

@@ -12809,41 +12809,54 @@ class function TRtcValueObject.json_checkFunctionType(const s:RtcWideString; con
             ( json_checkTag(RTC_JSON_FunctionName,s,at2) ) then
             Result:=rtc_Function;
           end
-        else if (rVer and 2=2) and json_checkTag(RTC_QJSONRPC,s,at2,true) then
+        else
           begin
-          if json_checkTag(':',s,at2,true) then
-            if ( json_checkTag(RTC_Q20,s,at2,true) or
-                 json_checkTag(RTC_Q10,s,at2,true) ) then
-              if json_checkTag(',',s,at2,true) then
-                begin
-                if json_checkTag(RTC_QID,s,at2,true) then
+          if (rVer and 3>0) and json_checkTag(RTC_QID,s,at2,true) then
+            begin
+            if not json_checkTag(':',s,at2,true) then Exit;
+            if not json_checkTag(RTC_SNULL,s,at2,true) then // skip null
+              if json_checkTagList(RTC_QNUMBERSTRING,s,at2) then
+                json_readString(s,at2) // skip value
+              else
+                Exit;
+            if not json_checkTag(',',s,at2,true) then Exit;
+            end;
+          if (rVer and 2=2) and json_checkTag(RTC_QJSONRPC,s,at2,true) then
+            begin
+            if json_checkTag(':',s,at2,true) then
+              if ( json_checkTag(RTC_Q20,s,at2,true) or
+                   json_checkTag(RTC_Q10,s,at2,true) ) then
+                if json_checkTag(',',s,at2,true) then
                   begin
-                  if not json_checkTag(':',s,at2,true) then Exit;
-                  if not json_checkTag(RTC_SNULL,s,at2,true) then // skip null
-                    if json_checkTagList(RTC_QNUMBERSTRING,s,at2) then
-                      json_readString(s,at2) // skip value
-                    else
-                      Exit;
-                  if not json_checkTag(',',s,at2,true) then Exit;
+                  if json_checkTag(RTC_QID,s,at2,true) then
+                    begin
+                    if not json_checkTag(':',s,at2,true) then Exit;
+                    if not json_checkTag(RTC_SNULL,s,at2,true) then // skip null
+                      if json_checkTagList(RTC_QNUMBERSTRING,s,at2) then
+                        json_readString(s,at2) // skip value
+                      else
+                        Exit;
+                    if not json_checkTag(',',s,at2,true) then Exit;
+                    end;
+                  if ( json_checkTag(RTC_QMETHOD,s,at2) or
+                       json_checkTag(RTC_QPARAMS,s,at2) ) then
+                    Result:=rtc_Function;
                   end;
-                if ( json_checkTag(RTC_QMETHOD,s,at2) or
-                     json_checkTag(RTC_QPARAMS,s,at2) ) then
-                  Result:=rtc_Function;
-                end;
-          end
-        else if (rVer and 5>0) and json_checkTag(RTC_QMETHOD,s,at2,true) then
-          begin
-          if json_checkTag(':',s,at2,true) then
-            if json_checkTag('"',s,at2,true) then
-              if json_readString(s,at2,true)<>'' then
-                if (rVer and 4=4) then
-                  Result:=rtc_Function
-                else if json_checkTag(',',s,at2,true) then
-                  if json_checkTag(RTC_QPARAMS,s,at2,true) then
-                    if json_checkTag(':',s,at2,true) then
-                      if json_checkTagList('[{',s,at2) or
-                         json_checkTag(RTC_SNULL,s,at2) then
-                        Result:=rtc_Function;
+            end
+          else if (rVer and 5>0) and json_checkTag(RTC_QMETHOD,s,at2,true) then
+            begin
+            if json_checkTag(':',s,at2,true) then
+              if json_checkTag('"',s,at2,true) then
+                if json_readString(s,at2,true)<>'' then
+                  if (rVer and 4=4) then
+                    Result:=rtc_Function
+                  else if json_checkTag(',',s,at2,true) then
+                    if json_checkTag(RTC_QPARAMS,s,at2,true) then
+                      if json_checkTag(':',s,at2,true) then
+                        if json_checkTagList('[{',s,at2) or
+                           json_checkTag(RTC_SNULL,s,at2) then
+                          Result:=rtc_Function;
+            end;
           end;
     end
   else
@@ -12876,70 +12889,83 @@ class function TRtcValueObject.json_checkResultType(const s:RtcWideString; const
             ( json_checkTag(RTC_JSON_FunctionName,s,at2) ) then
             Result:=rtc_Function;
           end
-        else if (rVer and 2=2) and json_checkTag(RTC_QJSONRPC,s,at2,true) then
+        else 
           begin
-          if json_checkTag(':',s,at2,true) then
-            if ( json_checkTag(RTC_Q20,s,at2,true) or
-                 json_checkTag(RTC_Q10,s,at2,true) ) then
-              if json_checkTag(',',s,at2,true) then
-                begin
-                if json_checkTag(RTC_QID,s,at2,true) then
-                  begin
-                  if not json_checkTag(':',s,at2,true) then Exit;
-                  if not json_checkTag(RTC_SNULL,s,at2,true) then // skip null
-                    if json_checkTagList(RTC_QNUMBERSTRING,s,at2) then
-                      json_readString(s,at2) // skip value
-                    else
-                      Exit;
-                  if not json_checkTag(',',s,at2,true) then Exit;
-                  end;
-                if json_checkTag(RTC_QERROR,s,at2) or
-                   json_checkTag(RTC_QERRORS,s,at2) or
-                   json_checkTag(RTC_QCODE,s,at2) or
-                   json_checkTag(RTC_QMESSAGE,s,at2) then
-                  Result:=rtc_Exception
-                else if json_checkTag(RTC_QRESULT,s,at2,true) then
-                  if json_checkTag(':',s,at2,true) then
-                    begin
-                    Result:=rtc_Variant;
-                    if json_checkTag(RTC_SNULL,s,at2,true) then
-                            if json_checkTag(',',s,at2,true) then
-                        if json_checkTag(RTC_QERROR,s,at2,true) then
-                          if json_checkTag(':',s,at2,true) then
-                            if json_checkTag('{',s,at2) then
-                              Result:=rtc_Exception;
-                    end;
-                end;
-          end
-        else if (rVer and 1=1) and
-                json_checkTag(RTC_QERROR,s,at2,true) then
-          begin
-          if json_checkTag(':',s,at2,true) then
-            if json_checkTag('{',s,at2,true) then
-              if (json_checkTag(RTC_QCODE,s,at2,true) or
-                  json_checkTag(RTC_QERRORS,s,at2,true) or
-                  json_checkTag(RTC_QMESSAGE,s,at2,true) or
-                  json_checkTag(RTC_QDATA,s,at2,true)) then
-                if json_checkTag(':',s,at2) then
-                  Result:=rtc_Exception;
-          end
-        else if (rVer and 1=1) and
-                json_checkTag(RTC_QRESULT,s,at2,true) then
-          if json_checkTag(':',s,at2,true) then
+          if (rVer and 3>0) and json_checkTag(RTC_QID,s,at2,true) then
             begin
-            Result:=rtc_Variant;
-            if json_checkTag(RTC_SNULL,s,at2,true) then
-              if json_checkTag(',',s,at2,true) then
-                if json_checkTag(RTC_QERROR,s,at2,true) then
-                  if json_checkTag(':',s,at2,true) then
-                    if json_checkTag('{',s,at2,true) then
-                      if (json_checkTag(RTC_QCODE,s,at2,true) or
-                          json_checkTag(RTC_QERRORS,s,at2,true) or
-                          json_checkTag(RTC_QMESSAGE,s,at2,true) or
-                          json_checkTag(RTC_QDATA,s,at2,true)) then
-                        if json_checkTag(':',s,at2) then
-                          Result:=rtc_Exception;
+            if not json_checkTag(':',s,at2,true) then Exit;
+            if not json_checkTag(RTC_SNULL,s,at2,true) then // skip null
+              if json_checkTagList(RTC_QNUMBERSTRING,s,at2) then
+                json_readString(s,at2) // skip value
+              else
+                Exit;
+            if not json_checkTag(',',s,at2,true) then Exit;
             end;
+          if (rVer and 2=2) and json_checkTag(RTC_QJSONRPC,s,at2,true) then
+            begin
+            if json_checkTag(':',s,at2,true) then
+              if ( json_checkTag(RTC_Q20,s,at2,true) or
+                   json_checkTag(RTC_Q10,s,at2,true) ) then
+                if json_checkTag(',',s,at2,true) then
+                  begin
+                  if json_checkTag(RTC_QID,s,at2,true) then
+                    begin
+                    if not json_checkTag(':',s,at2,true) then Exit;
+                    if not json_checkTag(RTC_SNULL,s,at2,true) then // skip null
+                      if json_checkTagList(RTC_QNUMBERSTRING,s,at2) then
+                        json_readString(s,at2) // skip value
+                      else
+                        Exit;
+                    if not json_checkTag(',',s,at2,true) then Exit;
+                    end;
+                  if json_checkTag(RTC_QERROR,s,at2) or
+                     json_checkTag(RTC_QERRORS,s,at2) or
+                     json_checkTag(RTC_QCODE,s,at2) or
+                     json_checkTag(RTC_QMESSAGE,s,at2) then
+                    Result:=rtc_Exception
+                  else if json_checkTag(RTC_QRESULT,s,at2,true) then
+                    if json_checkTag(':',s,at2,true) then
+                      begin
+                      Result:=rtc_Variant;
+                      if json_checkTag(RTC_SNULL,s,at2,true) then
+                              if json_checkTag(',',s,at2,true) then
+                          if json_checkTag(RTC_QERROR,s,at2,true) then
+                            if json_checkTag(':',s,at2,true) then
+                              if json_checkTag('{',s,at2) then
+                                Result:=rtc_Exception;
+                      end;
+                  end;
+            end
+          else if (rVer and 1=1) and
+                  json_checkTag(RTC_QERROR,s,at2,true) then
+            begin
+            if json_checkTag(':',s,at2,true) then
+              if json_checkTag('{',s,at2,true) then
+                if (json_checkTag(RTC_QCODE,s,at2,true) or
+                    json_checkTag(RTC_QERRORS,s,at2,true) or
+                    json_checkTag(RTC_QMESSAGE,s,at2,true) or
+                    json_checkTag(RTC_QDATA,s,at2,true)) then
+                  if json_checkTag(':',s,at2) then
+                    Result:=rtc_Exception;
+            end
+          else if (rVer and 1=1) and
+                  json_checkTag(RTC_QRESULT,s,at2,true) then
+            if json_checkTag(':',s,at2,true) then
+              begin
+              Result:=rtc_Variant;
+              if json_checkTag(RTC_SNULL,s,at2,true) then
+                if json_checkTag(',',s,at2,true) then
+                  if json_checkTag(RTC_QERROR,s,at2,true) then
+                    if json_checkTag(':',s,at2,true) then
+                      if json_checkTag('{',s,at2,true) then
+                        if (json_checkTag(RTC_QCODE,s,at2,true) or
+                            json_checkTag(RTC_QERRORS,s,at2,true) or
+                            json_checkTag(RTC_QMESSAGE,s,at2,true) or
+                            json_checkTag(RTC_QDATA,s,at2,true)) then
+                          if json_checkTag(':',s,at2) then
+                            Result:=rtc_Exception;
+              end;
+          end;
     end
   else
     Result:=json_checkStrType(s,at);
@@ -12973,102 +12999,119 @@ class function TRtcValueObject.json_checkStrType(const s:RtcWideString; const at
                     ( json_checkTag(RTC_JSON_FunctionName,s,at2) ) then
                     Result:=rtc_Function;
                   end
-                else if RTC_JSON_ParseRPC2 and
-                       ( RTC_JSON_ParseRPC2Functions or
-                         RTC_JSON_ParseRPC2Errors or
-                         RTC_JSON_ParseRPC2Results ) and
-                        json_checkTag(RTC_QJSONRPC,s,at2,true) then
+                else if RTC_JSON_ParseMethodFunctions or
+                        RTC_JSON_ParseRPC1 or 
+                        RTC_JSON_ParseRPC2 then 
                   begin
-                  if json_checkTag(':',s,at2,true) then
-                    if ( json_checkTag(RTC_Q20,s,at2,true) or
-                         json_checkTag(RTC_Q10,s,at2,true) ) then
-                      if json_checkTag(',',s,at2,true) then
-                        begin
-                        if json_checkTag(RTC_QID,s,at2,true) then
-                          begin
-                          if not json_checkTag(':',s,at2,true) then Exit;
-                          if not json_checkTag(RTC_SNULL,s,at2,true) then // skip null
-                            if json_checkTagList(RTC_QNUMBERSTRING,s,at2) then
-                              json_readString(s,at2) // skip value
-                            else
-                              Exit;
-                          if not json_checkTag(',',s,at2,true) then Exit;
-                          end;
-                        if RTC_JSON_ParseRPC2Functions and
-                          ( json_checkTag(RTC_QMETHOD,s,at2) or
-                            json_checkTag(RTC_QPARAMS,s,at2) ) then
-                          Result:=rtc_Function
-                        else if RTC_JSON_ParseRPC2Errors and
-                              ( json_checkTag(RTC_QERROR,s,at2) or
-                                json_checkTag(RTC_QERRORS,s,at2) or
-                                json_checkTag(RTC_QCODE,s,at2) or
-                                json_checkTag(RTC_QMESSAGE,s,at2) ) then
-                          Result:=rtc_Exception
-                        else if RTC_JSON_ParseRPC2Results and
-                                json_checkTag(RTC_QRESULT,s,at2,true) then
-                          if json_checkTag(':',s,at2,true) then
-                            begin
-                            Result:=rtc_Variant;
-                            if json_checkTag(RTC_SNULL,s,at2,true) then
-                              if json_checkTag(',',s,at2,true) then
-                                if json_checkTag(RTC_QERROR,s,at2,true) then
-                                  if json_checkTag(':',s,at2,true) then
-                                    if json_checkTag('{',s,at2) then
-                                      Result:=rtc_Exception;
-                            end;
-                        end;
-                  end
-                else if ( RTC_JSON_ParseMethodFunctions or
-                          (RTC_JSON_ParseRPC1 and
-                           RTC_JSON_ParseRPC1Functions) ) and
-                        json_checkTag(RTC_QMETHOD,s,at2,true) then
-                  begin
-                  if json_checkTag(':',s,at2,true) then
-                    if json_checkTag('"',s,at2,true) then
-                      if json_readString(s,at2,true)<>'' then
-                        if RTC_JSON_ParseMethodFunctions then
-                          Result:=rtc_Function
-                        else if json_checkTag(',',s,at2,true) then
-                          if json_checkTag(RTC_QPARAMS,s,at2,true) then
-                            if json_checkTag(':',s,at2,true) then
-                              if json_checkTagList('[{',s,at2) or
-                                 json_checkTag(RTC_SNULL,s,at2) then
-                                Result:=rtc_Function;
-                  end
-                else if RTC_JSON_ParseRPC1 and
-                        RTC_JSON_ParseRPC1Errors and
-                        json_checkTag(RTC_QERROR,s,at2,true) then
-                  begin
-                  if json_checkTag(':',s,at2,true) then
-                    if json_checkTag('{',s,at2,true) then
-                      if (json_checkTag(RTC_QCODE,s,at2,true) or
-                          json_checkTag(RTC_QERRORS,s,at2,true) or
-                          json_checkTag(RTC_QMESSAGE,s,at2,true) or
-                          json_checkTag(RTC_QDATA,s,at2,true)) then
-                        if json_checkTag(':',s,at2) then
-                          Result:=rtc_Exception;
-                  end
-                else if RTC_JSON_ParseRPC1 and
-                        ( RTC_JSON_ParseRPC1Errors or
-                          RTC_JSON_ParseRPC1Results ) and
-                        json_checkTag(RTC_QRESULT,s,at2,true) then
-                  begin
-                  if json_checkTag(':',s,at2,true) then
+                  if RTC_JSON_ParseRPC1 or
+                     RTC_JSON_ParseRPC2 then 
+                    if json_checkTag(RTC_QID,s,at2,true) then
+                      begin
+                      if not json_checkTag(':',s,at2,true) then Exit;
+                      if not json_checkTag(RTC_SNULL,s,at2,true) then // skip null
+                        if json_checkTagList(RTC_QNUMBERSTRING,s,at2) then
+                          json_readString(s,at2) // skip value
+                        else
+                          Exit;
+                      if not json_checkTag(',',s,at2,true) then Exit;
+                      end;
+                  if RTC_JSON_ParseRPC2 and
+                         ( RTC_JSON_ParseRPC2Functions or
+                           RTC_JSON_ParseRPC2Errors or
+                           RTC_JSON_ParseRPC2Results ) and
+                          json_checkTag(RTC_QJSONRPC,s,at2,true) then
                     begin
-                    if RTC_JSON_ParseRPC1Results then
-                      Result:=rtc_Variant;
-                    if RTC_JSON_ParseRPC1Errors then
-                      if json_checkTag(RTC_SNULL,s,at2,true) then
+                    if json_checkTag(':',s,at2,true) then
+                      if ( json_checkTag(RTC_Q20,s,at2,true) or
+                           json_checkTag(RTC_Q10,s,at2,true) ) then
                         if json_checkTag(',',s,at2,true) then
-                          if json_checkTag(RTC_QERROR,s,at2,true) then
+                          begin
+                          if json_checkTag(RTC_QID,s,at2,true) then
+                            begin
+                            if not json_checkTag(':',s,at2,true) then Exit;
+                            if not json_checkTag(RTC_SNULL,s,at2,true) then // skip null
+                              if json_checkTagList(RTC_QNUMBERSTRING,s,at2) then
+                                json_readString(s,at2) // skip value
+                              else
+                                Exit;
+                            if not json_checkTag(',',s,at2,true) then Exit;
+                            end;
+                          if RTC_JSON_ParseRPC2Functions and
+                            ( json_checkTag(RTC_QMETHOD,s,at2) or
+                              json_checkTag(RTC_QPARAMS,s,at2) ) then
+                            Result:=rtc_Function
+                          else if RTC_JSON_ParseRPC2Errors and
+                                ( json_checkTag(RTC_QERROR,s,at2) or
+                                  json_checkTag(RTC_QERRORS,s,at2) or
+                                  json_checkTag(RTC_QCODE,s,at2) or
+                                  json_checkTag(RTC_QMESSAGE,s,at2) ) then
+                            Result:=rtc_Exception
+                          else if RTC_JSON_ParseRPC2Results and
+                                  json_checkTag(RTC_QRESULT,s,at2,true) then
                             if json_checkTag(':',s,at2,true) then
-                              if json_checkTag('{',s,at2,true) then
-                                if (json_checkTag(RTC_QCODE,s,at2,true) or
-                                    json_checkTag(RTC_QERRORS,s,at2,true) or
-                                    json_checkTag(RTC_QMESSAGE,s,at2,true) or
-                                    json_checkTag(RTC_QDATA,s,at2,true)) then
-                                  if json_checkTag(':',s,at2) then
-                                    Result:=rtc_Exception;
+                              begin
+                              Result:=rtc_Variant;
+                              if json_checkTag(RTC_SNULL,s,at2,true) then
+                                if json_checkTag(',',s,at2,true) then
+                                  if json_checkTag(RTC_QERROR,s,at2,true) then
+                                    if json_checkTag(':',s,at2,true) then
+                                      if json_checkTag('{',s,at2) then
+                                        Result:=rtc_Exception;
+                              end;
+                          end;
+                    end
+                  else if ( RTC_JSON_ParseMethodFunctions or
+                            (RTC_JSON_ParseRPC1 and
+                             RTC_JSON_ParseRPC1Functions) ) and
+                          json_checkTag(RTC_QMETHOD,s,at2,true) then
+                    begin
+                    if json_checkTag(':',s,at2,true) then
+                      if json_checkTag('"',s,at2,true) then
+                        if json_readString(s,at2,true)<>'' then
+                          if RTC_JSON_ParseMethodFunctions then
+                            Result:=rtc_Function
+                          else if json_checkTag(',',s,at2,true) then
+                            if json_checkTag(RTC_QPARAMS,s,at2,true) then
+                              if json_checkTag(':',s,at2,true) then
+                                if json_checkTagList('[{',s,at2) or
+                                   json_checkTag(RTC_SNULL,s,at2) then
+                                  Result:=rtc_Function;
+                    end
+                  else if RTC_JSON_ParseRPC1 and
+                          RTC_JSON_ParseRPC1Errors and
+                          json_checkTag(RTC_QERROR,s,at2,true) then
+                    begin
+                    if json_checkTag(':',s,at2,true) then
+                      if json_checkTag('{',s,at2,true) then
+                        if (json_checkTag(RTC_QCODE,s,at2,true) or
+                            json_checkTag(RTC_QERRORS,s,at2,true) or
+                            json_checkTag(RTC_QMESSAGE,s,at2,true) or
+                            json_checkTag(RTC_QDATA,s,at2,true)) then
+                          if json_checkTag(':',s,at2) then
+                            Result:=rtc_Exception;
+                    end
+                  else if RTC_JSON_ParseRPC1 and
+                          ( RTC_JSON_ParseRPC1Errors or
+                            RTC_JSON_ParseRPC1Results ) and
+                          json_checkTag(RTC_QRESULT,s,at2,true) then
+                    begin
+                    if json_checkTag(':',s,at2,true) then
+                      begin
+                      if RTC_JSON_ParseRPC1Results then
+                        Result:=rtc_Variant;
+                      if RTC_JSON_ParseRPC1Errors then
+                        if json_checkTag(RTC_SNULL,s,at2,true) then
+                          if json_checkTag(',',s,at2,true) then
+                            if json_checkTag(RTC_QERROR,s,at2,true) then
+                              if json_checkTag(':',s,at2,true) then
+                                if json_checkTag('{',s,at2,true) then
+                                  if (json_checkTag(RTC_QCODE,s,at2,true) or
+                                      json_checkTag(RTC_QERRORS,s,at2,true) or
+                                      json_checkTag(RTC_QMESSAGE,s,at2,true) or
+                                      json_checkTag(RTC_QDATA,s,at2,true)) then
+                                    if json_checkTag(':',s,at2) then
+                                      Result:=rtc_Exception;
+                      end;
                     end;
                   end;
             end;
@@ -14433,6 +14476,13 @@ procedure TRtcExceptionValue.from_JSON(const s:RtcWideString; var at: integer; c
         if not json_checkTag(RTC_SNULL,s,at,true) then
           {ID:=}json_readString(s,at); // ignore
         end
+      else if json_checkTag(RTC_QJSONRPC,s,at,true) then
+        begin
+        json_skipTag(':',s,at);
+        if not (json_checkTag(RTC_Q20,s,at,true) or
+                json_checkTag(RTC_Q10,s,at,true)) then
+          raise ERtcInfo.Create('JSON Error @'+IntToStr(at)+': Unsupported JSON RPC version');
+        end
       else
         raise ERtcInfo.Create('JSON Error @'+IntToStr(at)+': Expecting "code", "message", "errors" or "data" inside a "jsonrpc" error object');
       until not json_checkTag(',',s,at,true);
@@ -14477,6 +14527,13 @@ procedure TRtcExceptionValue.from_JSON(const s:RtcWideString; var at: integer; c
           json_skipWhitespace(s,at);
           if not json_checkTag(RTC_SNULL,s,at,true) then
             {ID:=}json_readString(s,at); // ignore
+          end
+        else if json_checkTag(RTC_QJSONRPC,s,at,true) then
+          begin
+          json_skipTag(':',s,at);
+          if not (json_checkTag(RTC_Q20,s,at,true) or
+                  json_checkTag(RTC_Q10,s,at,true)) then
+            raise ERtcInfo.Create('JSON Error @'+IntToStr(at)+': Unsupported JSON RPC version');
           end
         else
           ParseErrorInfo;
@@ -19477,14 +19534,6 @@ procedure TRtcValue.from_JSON(const s:RtcWideString; var at: integer; const MaxD
   else if json_checkStrType(s,at)=rtc_Variant then
     begin
     json_skipTag('{',s,at);
-    if json_checkTag(RTC_QJSONRPC,s,at,true) then
-      begin
-      json_skipTag(':',s,at);
-      if not (json_checkTag(RTC_Q20,s,at,true) or
-              json_checkTag(RTC_Q10,s,at,true)) then
-        raise ERtcInfo.Create('JSON Error @'+IntToStr(at)+': Unsupported JSON RPC version');
-      json_skipTag(',',s,at);
-      end;
     repeat
       if json_checkTag(RTC_QRESULT,s,at,true) then
         begin
@@ -19518,6 +19567,13 @@ procedure TRtcValue.from_JSON(const s:RtcWideString; var at: integer; const MaxD
               raise ERtcInfo.Create('JSON Error @'+IntToStr(at)+': Duplicate "id" object found inside "jsonrpc"');
             FValue:=ObjectFromJSON(s,at,MaxDepth);
             end;
+        end
+      else if json_checkTag(RTC_QJSONRPC,s,at,true) then
+        begin
+        json_skipTag(':',s,at);
+        if not (json_checkTag(RTC_Q20,s,at,true) or
+                json_checkTag(RTC_Q10,s,at,true)) then
+          raise ERtcInfo.Create('JSON Error @'+IntToStr(at)+': Unsupported JSON RPC version');
         end
       else
         raise ERtcInfo.Create('JSON Error @'+IntToStr(at)+': Expecting "result", "error" or "id" inside "jsonrpc"');
@@ -20142,17 +20198,6 @@ procedure TRtcValueResult.from_JSONrpc(rVer:byte; const s:RtcWideString; var at:
       begin
       reqVer:=0;
       json_skipTag('{',s,at);
-      if (rVer and 2=2) and json_checkTag(RTC_QJSONRPC,s,at,true) then
-        begin
-        json_skipTag(':',s,at);
-        if json_checkTag(RTC_Q20,s,at,true) then
-          reqVer:=2
-        else if json_checkTag(RTC_Q10,s,at,true) then
-          reqVer:=1
-        else
-          raise ERtcInfo.Create('JSON Error @'+IntToStr(at)+': Unsupported JSON RPC version');
-        json_skipTag(',',s,at);
-        end;
       haveErr:=False;
       haveRes:=False;
       haveID:=False;
@@ -20198,6 +20243,16 @@ procedure TRtcValueResult.from_JSONrpc(rVer:byte; const s:RtcWideString; var at:
               raise ERtcInfo.Create('JSON Error @'+IntToStr(at)+': Duplicate "id" object found inside "jsonrpc"');
             FValue:=ObjectFromJSON(s,at,MaxDepth);
             end;
+          end
+        else if (rVer and 2=2) and json_checkTag(RTC_QJSONRPC,s,at,true) then
+          begin
+          json_skipTag(':',s,at);
+          if json_checkTag(RTC_Q20,s,at,true) then
+            reqVer:=2
+          else if json_checkTag(RTC_Q10,s,at,true) then
+            reqVer:=1
+          else
+            raise ERtcInfo.Create('JSON Error @'+IntToStr(at)+': Unsupported JSON RPC version');
           end
         else
           raise ERtcInfo.Create('JSON Error @'+IntToStr(at)+': Expecting "result", "error" or "id" inside "jsonrpc"');
@@ -23768,22 +23823,40 @@ procedure TRtcFunctionInfo.from_JSON(const s:RtcWideString; var at: integer; con
       i:integer;
     begin
     xval:=ObjectFromJSON(s,at,MaxDepth-1);
-    if (xname=RTC_PARAMS) and
-       (xval is TRtcArray) and
-       (TRtcArray(xval).Count=1) and
-       (TRtcArray(xval).isType[0]=rtc_Record) then
+    if xname=RTC_PARAMS then
       begin
-      rec:=TRtcArray(xval).asRecord[0];
-      try
-        for i:=0 to rec.Count-1 do
-          begin
-          xname:=rec.FieldName[i];
-          val.Add(xname,rec.asObject[xname]);
-          rec.asObject[xname]:=nil;
+      if xval is TRtcRecord then
+        begin
+        rec:=TRtcRecord(xval);
+        try
+          for i:=0 to rec.Count-1 do
+            begin
+            xname:=rec.FieldName[i];
+            val.Add(xname,rec.asObject[xname]);
+            rec.asObject[xname]:=nil;
+            end;
+        finally
+          RtcFreeAndNil(xval);
           end;
-      finally
-        RtcFreeAndNil(xval);
-        end;
+        end
+      else if (xval is TRtcArray) and
+         (TRtcArray(xval).Count=1) and
+         (TRtcArray(xval).isType[0]=rtc_Record) then
+        begin
+        rec:=TRtcArray(xval).asRecord[0];
+        try
+          for i:=0 to rec.Count-1 do
+            begin
+            xname:=rec.FieldName[i];
+            val.Add(xname,rec.asObject[xname]);
+            rec.asObject[xname]:=nil;
+            end;
+        finally
+          RtcFreeAndNil(xval);
+          end;
+        end
+      else
+        val.Add(xname, xval);
       end
     else
       val.Add(xname, xval);
@@ -23932,6 +24005,21 @@ procedure TRtcFunctionInfo.from_JSON(const s:RtcWideString; var at: integer; con
               end
             else
               begin
+              xname:='id';
+              xval:=ObjectFromJSON(s,at,MaxDepth-1);
+              val.Add(xname, xval);
+              end;
+            end
+          else if (reqVer=0) and json_checkTag(RTC_QJSONRPC,s,at,true) then
+            begin
+            json_skipTag(':',s,at);
+            if json_checkTag(RTC_Q20,s,at,true) then
+              reqVer:=2
+            else if json_checkTag(RTC_Q10,s,at,true) then
+              reqVer:=1
+            else if not json_checkTag(RTC_SNULL,s,at,true) then
+              begin
+              xname:='jsonrpc';
               xval:=ObjectFromJSON(s,at,MaxDepth-1);
               val.Add(xname, xval);
               end;
@@ -23947,12 +24035,13 @@ procedure TRtcFunctionInfo.from_JSON(const s:RtcWideString; var at: integer; con
             raise ERtcInfo.Create('JSON Error @'+IntToStr(at)+': Expecting " after {');
           until not json_checkTag(',',s,at,true);
         json_skipTag('}',s,at);
-        if noname then
-          reqVer:=0
-        else if noid then
-          reqVer:=3
-        else
-          reqVer:=1;
+        if reqVer=0 then
+          if noname then
+            reqVer:=0
+          else if noid then
+            reqVer:=3
+          else
+            reqVer:=1;
       except
         on E:Exception do
           begin

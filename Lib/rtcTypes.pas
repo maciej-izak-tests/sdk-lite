@@ -10,7 +10,7 @@ interface
 
 const
   // RealThinClient SDK version
-  RTCSDK_VERSION='v8.15';
+  RTCSDK_VERSION='v8.16';
 
 const
 {$IFDEF WINDOWS}

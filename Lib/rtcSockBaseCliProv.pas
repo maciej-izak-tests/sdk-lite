@@ -26,7 +26,6 @@ uses
 type
   TRtcBaseSockClientProvider = class(TRtcThrClientProvider)
   private
-    FCS:TRtcCritSec;
     FCryptPlugin: TRtcCryptPlugin;
     FTimeoutsOfAPI: TRtcTimeoutsOfAPI;
 
@@ -34,8 +33,6 @@ type
     FCryptObject:TObject;
 
     procedure CleanUp; override;
-    procedure Enter; override;
-    procedure Leave; override;
 
   public
     constructor Create; override;
@@ -58,8 +55,6 @@ constructor TRtcBaseSockClientProvider.Create;
 
   FCryptObject:=nil;
 
-  FCS:=TRtcCritSec.Create;
-
   FPeerPort:='';
   FPeerAddr:='';
   FLocalPort:='';
@@ -75,11 +70,7 @@ procedure TRtcBaseSockClientProvider.CleanUp;
       FLocalPort:='';
       FLocalAddr:='';
     finally
-      try
-        inherited;
-      finally
-        RtcFreeAndNil(FCS);
-      end;
+      inherited;
     end;
   except
     on E:Exception do
@@ -89,18 +80,6 @@ procedure TRtcBaseSockClientProvider.CleanUp;
       raise;
       end;
     end;
-  end;
-
-procedure TRtcBaseSockClientProvider.Enter;
-  begin
-  if FCS=nil then
-    Abort;
-  FCS.Acquire;
-  end;
-
-procedure TRtcBaseSockClientProvider.Leave;
-  begin
-  FCS.Release;
   end;
 
 end.

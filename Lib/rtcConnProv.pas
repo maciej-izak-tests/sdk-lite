@@ -30,6 +30,7 @@ uses
 
   rtcTypes,
   rtcLog,
+  rtcSyncObjs,
   rtcThrPool;
 
 type
@@ -92,6 +93,7 @@ type
     // Used for triggering events (provider declares those as virtual abstract)
 
     FError:TRtcErrEvent;
+    FCS:TRtcCritSec;
 
     FOnReadyToRelease:TRtcBasicEvent;
 
@@ -133,8 +135,8 @@ type
 
     procedure CleanUp; virtual;
 
-    procedure Enter; virtual; abstract;
-    procedure Leave; virtual; abstract;
+    procedure Enter;
+    procedure Leave;
 
     { Properties ready for usage by the connection provider (not used directly by the connection) }
 
@@ -464,6 +466,7 @@ procedure TRtcConnectionProvider.CleanUp;
 constructor TRtcConnectionProvider.Create;
   begin
   inherited;
+  FCS:=TRtcCritSec.Create;
   FState:=conPrepared;
 
   FInSync:=False;
@@ -482,6 +485,7 @@ destructor TRtcConnectionProvider.Destroy;
   try
     CleanUp;
     TriggerAfterDestroy;
+    RtcFreeAndNil(FCS);
     inherited;
   except
     on E:Exception do
@@ -732,6 +736,16 @@ function TRtcConnectionProvider.GetMultiThreaded: boolean;
 procedure TRtcConnectionProvider.SetMultiThreaded(val: boolean);
   begin
   FMultiThreaded:=val;
+  end;
+
+procedure TRtcConnectionProvider.Enter;
+  begin
+  FCS.Acquire;
+  end;
+
+procedure TRtcConnectionProvider.Leave;
+  begin
+  FCS.Release;
   end;
 
 { TRtcServerProvider }

@@ -35,9 +35,6 @@ type
   (*** Methods that have to be implemented by the connection provider: *** ->
 
   protected
-    procedure Enter; override;
-    procedure Leave; override;
-
     function GetClientThread:TRtcThread; override;
 
   public
@@ -63,10 +60,6 @@ type
     function PostJob(var _Job; HighPriority:boolean; ForceThread:boolean=False):boolean; override;
 
   (*** Methods that have to be implemented by the connection provider: *** ->
-
-  protected
-    procedure Enter; override;
-    procedure Leave; override;
 
   public
     procedure Connect(Force:boolean=False); override;
@@ -97,9 +90,6 @@ type
   (*** Methods that have to be implemented by the connection provider: ***
 
   protected
-    procedure Enter; override;
-    procedure Leave; override;
-
     procedure CopyFrom(Dup:TRtcConnectionProvider);
 
     function GetClientThread:TRtcThread; override;
@@ -132,9 +122,6 @@ type
   (*** Methods that have to be implemented by the connection provider: ***
 
   protected
-    procedure Enter; override;
-    procedure Leave; override;
-
     procedure CopyFrom(Dup:TRtcConnectionProvider);
 
   public

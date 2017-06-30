@@ -1921,6 +1921,7 @@ function TRtcSocketClientThread.RunJob:boolean;
     else if Job=Message_WSRelease_Silent then
       begin
       try
+        Par:=nil;
         _Silent:=True;
       except
         on E:Exception do if LOG_AV_ERRORS then

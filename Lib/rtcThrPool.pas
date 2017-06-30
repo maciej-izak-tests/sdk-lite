@@ -2792,14 +2792,14 @@ RtcFreeAndNil(ForcePool);
 RtcFreeAndNil(ThrList);
 RtcFreeAndNil(WaitList);
 RtcFreeAndNil(Message_Quit);
-{$IFDEF RTC_DEBUG}Log('Thread List released','DEBUG');{$ENDIF}
+{$IFDEF RTC_DEBUG}Log('Thread List released.','DEBUG');{$ENDIF}
 
 {$IFDEF RTC_DEBUG}Log('Releasing Sync List','DEBUG');{$ENDIF}
 RtcFreeAndNil(SyCS);
 RtcFreeAndNil(SyEV);
 RtcFreeAndNil(SyOpen);
 RtcFreeAndNil(SyList);
-{$IFDEF RTC_DEBUG}Log('Sync Events List.','DEBUG');{$ENDIF}
+{$IFDEF RTC_DEBUG}Log('Sync List released.','DEBUG');{$ENDIF}
 
 {$IFDEF RTC_DEBUG} Log('rtcThrPool Finalized.','DEBUG');{$ENDIF}
 end.

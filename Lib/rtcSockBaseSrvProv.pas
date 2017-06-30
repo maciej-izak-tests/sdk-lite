@@ -30,7 +30,6 @@ const
 type
   TRtcBaseSockServerProvider = class(TRtcThrServerProvider)
   private
-    FCS:TRtcCritSec;
     FCryptPlugin: TRtcCryptPlugin;
     FTimeoutsOfAPI: TRtcTimeoutsOfAPI;
 
@@ -38,9 +37,6 @@ type
     FCryptObject:TObject;
 
     procedure CleanUp; override;
-
-    procedure Enter; override;
-    procedure Leave; override;
 
     procedure CopyFrom(Dup:TRtcConnectionProvider); virtual;
 
@@ -64,8 +60,6 @@ constructor TRtcBaseSockServerProvider.Create;
 
   FCryptObject:=nil;
 
-  FCS:=TRtcCritSec.Create;
-
   FPeerPort:='';
   FPeerAddr:='';
   FLocalPort:='';
@@ -81,11 +75,7 @@ procedure TRtcBaseSockServerProvider.CleanUp;
       FLocalPort:='';
       FLocalAddr:='';
     finally
-      try
-        inherited;
-      finally
-        RtcFreeAndNil(FCS);
-        end;
+      inherited;
       end;
   except
     on E:Exception do
@@ -100,18 +90,6 @@ procedure TRtcBaseSockServerProvider.CleanUp;
 procedure TRtcBaseSockServerProvider.CopyFrom(Dup: TRtcConnectionProvider);
   begin
   FCryptPlugin:=TRtcBaseSockServerProvider(Dup).CryptPlugin;
-  end;
-
-procedure TRtcBaseSockServerProvider.Enter;
-  begin
-  if FCS=nil then
-    Abort;
-  FCS.Acquire;
-  end;
-
-procedure TRtcBaseSockServerProvider.Leave;
-  begin
-  FCS.Release;
   end;
 
 end.

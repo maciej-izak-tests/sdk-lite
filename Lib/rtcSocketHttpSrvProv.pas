@@ -766,6 +766,13 @@ procedure TRtcSocketHttpServerProvider.WriteHeader(SendNow:boolean=True);
   Response.Sending:=True;
   Response.Started:=True;
 
+  if Response.SendContent then
+    if (Request.Method='HEAD') or
+       (Response.StatusCode=204) or
+       (Response.StatusCode=304) or
+       ( (Response.StatusCode>=100) and (Response.StatusCode<=199) ) then
+      Response.SendContent:=False;
+
   if Response.SendContent and
     (Response.ValueCS['CONTENT-LENGTH']='')  then // streaming data
     begin
@@ -844,6 +851,13 @@ procedure TRtcSocketHttpServerProvider.WriteHeader(const Header_Text:RtcString; 
 
   Response.Sending:=True;
   Response.Started:=True;
+
+  if Response.SendContent then
+    if (Request.Method='HEAD') or
+       (Response.StatusCode=204) or
+       (Response.StatusCode=304) or
+       ( (Response.StatusCode>=100) and (Response.StatusCode<=199) ) then
+      Response.SendContent:=False;
 
   if Response.SendContent and
     (Response.ValueCS['CONTENT-LENGTH']='')  then // streaming data

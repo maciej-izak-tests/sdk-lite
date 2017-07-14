@@ -422,16 +422,16 @@ procedure TRtcSocketHttpClientProvider.TriggerDataReceived;
               MyPos:=Pos(CRLF, HeadStr);
               end;
 
-            if Response.ValueCS['CONTENT-LENGTH']<>'' then
-              LenToRead:=Response.ContentLength
-            else if (Request.Method='HEAD') or
-                    (Response.StatusCode=204) or
-                    (Response.StatusCode=304) or
-                    ( (Response.StatusCode>=100) and (Response.StatusCode<=199) ) then
+            if (Request.Method='HEAD') or
+               (Response.StatusCode=204) or
+               (Response.StatusCode=304) or
+               ( (Response.StatusCode>=100) and (Response.StatusCode<=199) ) then
               begin
               LenToRead:=0;
               Response.Done:=True;
               end
+            else if Response.ValueCS['CONTENT-LENGTH']<>'' then
+              LenToRead:=Response.ContentLength
             else
               LenToRead:=-1;
 
